@@ -1,14 +1,17 @@
 import { Dumbbell } from 'lucide-react';
-import { ModuleComingSoon } from '@/features/ModuleComingSoon';
+import { ModuleShell } from '@/features/ModuleShell';
 
 export function WorkoutPage() {
   return (
-    <ModuleComingSoon
+    <ModuleShell
       title="Treino"
-      icon={<Dumbbell className="size-6" />}
-      headline="Módulo de treino em construção"
-      description="A estrutura de dados já está pronta. A interface de treino é a próxima fase."
-      features={[
+      description="Suas rotinas, a sessão em andamento e o histórico de cada exercício."
+      empty={{
+        icon: <Dumbbell className="size-6" />,
+        title: 'Nenhuma rotina criada',
+        description: 'O construtor de rotinas e o registro de séries chegam na próxima atualização.',
+      }}
+      upcoming={[
         'Rotinas e divisão semanal',
         'Biblioteca de exercícios',
         'Registro de séries com poucos toques',

@@ -1,7 +1,9 @@
 import { Droplets, Dumbbell, Flag, Scale } from 'lucide-react';
 import { Link } from 'react-router';
-import { BigNumber, Card, CardTitle } from '@/components/ui/Card';
-import { PageBody } from '@/components/ui/Page';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { Card, MetricCard } from '@/components/ui/Card';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { PageContainer, TileGrid } from '@/components/layout/PageContainer';
 import { ProgressBar, ProgressRing } from '@/components/ui/Progress';
 import { LoadingScreen } from '@/components/ui/States';
 import { goalProgress, projectGoalDate, requiredWeeklyRate } from '@/domain/calc/goals';
@@ -40,26 +42,28 @@ export function HomePage() {
 
   return (
     <>
-      <header className="px-5 pb-4 pt-[calc(var(--sat)+1.25rem)]">
-        <p className="text-[13px] font-medium text-muted">{formatLongDay(today)}</p>
-        <h1 className="mt-0.5 text-[28px] font-semibold leading-tight tracking-tight">
-          {greetingFor()}
-          {firstName && <span className="text-muted">, {firstName}</span>}
-        </h1>
-      </header>
+      <AppHeader
+        eyebrow={formatLongDay(today)}
+        title={
+          <>
+            {greetingFor()}
+            {firstName && <span className="text-muted">, {firstName}</span>}
+          </>
+        }
+      />
 
-      <PageBody>
+      <PageContainer>
         {progress && <CaloriesCard kcal={progress.kcal} protein={progress.protein} carbs={progress.carbs} fat={progress.fat} entries={nutrition?.entries ?? 0} />}
 
-        <div className="grid grid-cols-2 gap-3">
+        <TileGrid>
           {water && <WaterTile water={water} />}
           <WeightTile summary={weight!} today={today} />
-        </div>
+        </TileGrid>
 
         {goal && weight?.latest && <GoalCard goal={goal} current={weight.latest.weightKg} rate={weight.ratePerWeek} today={today} />}
 
         <WorkoutTodayCard sessions={sessions ?? []} />
-      </PageBody>
+      </PageContainer>
     </>
   );
 }
@@ -78,16 +82,16 @@ function CaloriesCard({
   entries: number;
 }) {
   return (
-    <Card tone="accent" className="p-5">
+    <Card tone="accent" interactive className="p-5">
       <Link to="/nutricao" className="flex items-center gap-5" aria-label="Abrir nutrição">
         <ProgressRing ratio={kcal.ratio} over={kcal.over} size={136} stroke={11} label={`${Math.round(kcal.rawRatio * 100)}% da meta calórica`}>
-          <span className="tabular font-display text-[34px] font-bold leading-none">{formatNumber(Math.abs(kcal.remaining))}</span>
-          <span className="mt-1 text-[12px] font-medium text-muted">{kcal.over ? 'kcal acima' : 'kcal restantes'}</span>
+          <span className="tabular font-display text-metric font-bold leading-none">{formatNumber(Math.abs(kcal.remaining))}</span>
+          <span className="mt-1 text-xs font-medium text-muted">{kcal.over ? 'kcal acima' : 'kcal restantes'}</span>
         </ProgressRing>
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted">Calorias</p>
-            <p className="tabular text-[15px]">
+            <p className="text-xs font-semibold uppercase tracking-label text-muted">Calorias</p>
+            <p className="tabular text-body">
               <b className="text-ink">{formatNumber(kcal.consumed)}</b>
               <span className="text-muted"> / {formatNumber(kcal.target)}</span>
             </p>
@@ -97,7 +101,7 @@ function CaloriesCard({
           <MacroLine label="Gordura" p={fat} color="var(--color-fat)" />
         </div>
       </Link>
-      {entries === 0 && <p className="mt-4 border-t border-line/60 pt-3 text-[13px] text-muted">Nenhuma refeição registrada hoje.</p>}
+      {entries === 0 && <p className="mt-4 border-t border-line/60 pt-3 text-caption text-muted">Nenhuma refeição registrada hoje.</p>}
     </Card>
   );
 }
@@ -105,7 +109,7 @@ function CaloriesCard({
 function MacroLine({ label, p, color }: { label: string; p: MetricProgress; color: string }) {
   return (
     <div>
-      <div className="mb-1 flex justify-between text-[12px]">
+      <div className="mb-1 flex justify-between text-xs">
         <span className="text-muted">{label}</span>
         <span className="tabular font-medium">
           {formatNumber(p.consumed)}
@@ -119,39 +123,37 @@ function MacroLine({ label, p, color }: { label: string; p: MetricProgress; colo
 
 function WaterTile({ water }: { water: MetricProgress }) {
   return (
-    <Card className="flex flex-col">
-      <CardTitle icon={<Droplets className="size-4 text-water" />}>Água</CardTitle>
-      <BigNumber value={formatNumber(water.consumed / 1000, 1)} unit={`/ ${formatNumber(water.target / 1000, 1)} L`} />
-      <ProgressBar ratio={water.ratio} color="var(--color-water)" label="Progresso de hidratação" className="mt-auto" />
-      <p className="mt-2 text-[12px] text-muted">
-        {water.consumed >= water.target ? 'Meta batida' : `Faltam ${formatVolumeMl(water.target - water.consumed)}`}
-      </p>
-    </Card>
+    <MetricCard
+      label="Água"
+      icon={<Droplets className="size-4 text-water" />}
+      value={formatNumber(water.consumed / 1000, 1)}
+      unit={`/ ${formatNumber(water.target / 1000, 1)} L`}
+      progress={{ ratio: water.ratio, color: 'var(--color-water)', label: 'Progresso de hidratação' }}
+      footnote={water.consumed >= water.target ? 'Meta batida' : `Faltam ${formatVolumeMl(water.target - water.consumed)}`}
+    />
   );
 }
 
 function WeightTile({ summary, today }: { summary: NonNullable<ReturnType<typeof useWeightSummary>>; today: string }) {
   const latest = summary.latest;
   return (
-    <Card className="flex flex-col">
-      <CardTitle icon={<Scale className="size-4 text-accent" />}>Peso</CardTitle>
-      {latest ? (
-        <>
-          <BigNumber value={formatNumber(latest.weightKg, 1)} unit="kg" />
-          <p className="mt-auto pt-3 text-[12px] text-muted">
-            {summary.change7d !== null ? (
-              <>
-                <b className="tabular text-ink">{formatSigned(summary.change7d)} kg</b> em 7 dias
-              </>
-            ) : (
-              <>Registrado {formatRelativeDay(latest.day, today).toLowerCase()}</>
-            )}
-          </p>
-        </>
-      ) : (
-        <p className="text-[13px] text-muted">Sem pesagens ainda.</p>
-      )}
-    </Card>
+    <MetricCard
+      label="Peso"
+      icon={<Scale className="size-4 text-accent" />}
+      value={latest ? formatNumber(latest.weightKg, 1) : null}
+      unit="kg"
+      emptyText="Sem pesagens ainda."
+      footnote={
+        latest &&
+        (summary.change7d !== null ? (
+          <>
+            <b className="tabular text-ink">{formatSigned(summary.change7d)} kg</b> em 7 dias
+          </>
+        ) : (
+          <>Registrado {formatRelativeDay(latest.day, today).toLowerCase()}</>
+        ))
+      }
+    />
   );
 }
 
@@ -171,11 +173,13 @@ function GoalCard({
   const needed = requiredWeeklyRate(goal, current, today);
   return (
     <Card>
-      <CardTitle icon={<Flag className="size-4 text-accent" />} action={<span className="tabular text-[13px] font-semibold text-accent">{Math.round(p.ratio * 100)}%</span>}>
-        Meta principal
-      </CardTitle>
+      <SectionHeader
+        icon={<Flag className="size-4 text-accent" />}
+        title="Meta principal"
+        action={<span className="tabular text-caption font-semibold text-accent">{Math.round(p.ratio * 100)}%</span>}
+      />
       <div className="flex items-baseline justify-between">
-        <p className="text-[15px]">
+        <p className="text-body">
           {p.achieved ? (
             <b className="text-accent">Meta atingida</b>
           ) : (
@@ -185,12 +189,12 @@ function GoalCard({
             </>
           )}
         </p>
-        <p className="tabular text-[13px] text-muted">
+        <p className="tabular text-caption text-muted">
           {formatNumber(goal.startValue, 1)} → <b className="text-ink">{formatNumber(goal.targetValue, 1)} kg</b>
         </p>
       </div>
       <ProgressBar ratio={p.ratio} label="Progresso da meta de peso" className="mt-3" />
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-muted">
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         {rate !== null && (
           <span>
             Ritmo: <b className="tabular text-ink">{formatSigned(rate, 2)} kg/sem</b>
@@ -217,17 +221,17 @@ function WorkoutTodayCard({ sessions }: { sessions: NonNullable<ReturnType<typeo
   const done = sessions.filter((s) => s.status === 'completed');
   return (
     <Card>
-      <CardTitle icon={<Dumbbell className="size-4 text-accent" />}>Treino de hoje</CardTitle>
+      <SectionHeader icon={<Dumbbell className="size-4 text-accent" />} title="Treino de hoje" />
       {active ? (
-        <p className="text-[15px]">
+        <p className="text-body">
           <b>{active.name}</b> <span className="text-accent">em andamento</span>
         </p>
       ) : done.length > 0 ? (
-        <p className="text-[15px]">
+        <p className="text-body">
           <b>{done.map((s) => s.name).join(', ')}</b> <span className="text-muted">concluído</span>
         </p>
       ) : (
-        <p className="text-[15px] text-muted">Nenhum treino registrado hoje.</p>
+        <p className="text-body text-muted">Nenhum treino registrado hoje.</p>
       )}
     </Card>
   );

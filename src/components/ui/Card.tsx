@@ -1,34 +1,26 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { ProgressBar } from './Progress';
+import { SectionHeader } from './SectionHeader';
 
 type Tone = 'default' | 'elevated' | 'accent';
 
-export function Card({ tone = 'default', className, children, ...rest }: HTMLAttributes<HTMLDivElement> & { tone?: Tone }) {
-  return (
-    <div
-      className={cn(
-        'rounded-[var(--radius-card)] border p-4',
-        tone === 'default' && 'border-line/70 bg-surface',
-        tone === 'elevated' && 'border-line bg-elevated',
-        tone === 'accent' &&
-          'border-accent/20 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(163,230,53,0.14),transparent_55%),linear-gradient(180deg,#1f2328,#1a1d21)]',
-        className,
-      )}
-      {...rest}
-    >
-      {children}
-    </div>
-  );
-}
+const tones: Record<Tone, string> = {
+  default: 'border-line/70 bg-surface',
+  elevated: 'border-line bg-elevated shadow-raised',
+  accent: 'border-accent/20 bg-accent-glow',
+};
 
-export function CardTitle({ icon, children, action }: { icon?: ReactNode; children: ReactNode; action?: ReactNode }) {
+export function Card({
+  tone = 'default',
+  interactive = false,
+  className,
+  children,
+  ...rest
+}: HTMLAttributes<HTMLDivElement> & { tone?: Tone; interactive?: boolean }) {
   return (
-    <div className="mb-3 flex items-center justify-between gap-2">
-      <h2 className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-muted">
-        {icon}
-        {children}
-      </h2>
-      {action}
+    <div className={cn('rounded-card border p-4', tones[tone], interactive && 'pressable', className)} {...rest}>
+      {children}
     </div>
   );
 }
@@ -40,5 +32,46 @@ export function BigNumber({ value, unit, className }: { value: string; unit?: st
       <span className="tabular font-display text-4xl font-bold leading-none tracking-tight text-ink">{value}</span>
       {unit && <span className="text-sm font-medium text-muted">{unit}</span>}
     </span>
+  );
+}
+
+/**
+ * Compact metric tile: label, big value, optional progress and footnote.
+ * Pass `value={null}` with an `emptyText` to render the no-data state.
+ */
+export function MetricCard({
+  label,
+  icon,
+  value,
+  unit,
+  progress,
+  footnote,
+  emptyText = 'Sem registros ainda.',
+  className,
+}: {
+  label: string;
+  icon?: ReactNode;
+  value: string | null;
+  unit?: string;
+  progress?: { ratio: number; color?: string; label: string; over?: boolean };
+  footnote?: ReactNode;
+  emptyText?: string;
+  className?: string;
+}) {
+  return (
+    <Card className={cn('flex flex-col', className)}>
+      <SectionHeader icon={icon} title={label} />
+      {value === null ? (
+        <p className="text-caption text-muted">{emptyText}</p>
+      ) : (
+        <>
+          <BigNumber value={value} unit={unit} />
+          <div className="mt-auto pt-3">
+            {progress && <ProgressBar ratio={progress.ratio} color={progress.color} over={progress.over} label={progress.label} />}
+            {footnote && <p className={cn('text-xs text-muted', progress && 'mt-2')}>{footnote}</p>}
+          </div>
+        </>
+      )}
+    </Card>
   );
 }

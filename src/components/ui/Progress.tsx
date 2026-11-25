@@ -43,7 +43,7 @@ export function ProgressRing({
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 600ms cubic-bezier(0.22,1,0.36,1)' }}
+          className="transition-all duration-slow ease-out-expo"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">{children}</div>
@@ -75,12 +75,8 @@ export function ProgressBar({
       className={cn('h-2 w-full overflow-hidden rounded-full bg-elevated', className)}
     >
       <div
-        className="h-full rounded-full"
-        style={{
-          width: `${pct}%`,
-          background: over ? 'var(--color-warning)' : color,
-          transition: 'width 600ms cubic-bezier(0.22,1,0.36,1)',
-        }}
+        className="h-full rounded-full transition-all duration-slow ease-out-expo"
+        style={{ width: `${pct}%`, background: over ? 'var(--color-warning)' : color }}
       />
     </div>
   );

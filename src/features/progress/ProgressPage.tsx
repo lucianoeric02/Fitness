@@ -1,19 +1,17 @@
 import { TrendingUp } from 'lucide-react';
-import { ModuleComingSoon } from '@/features/ModuleComingSoon';
+import { ModuleShell } from '@/features/ModuleShell';
 
 export function ProgressPage() {
   return (
-    <ModuleComingSoon
+    <ModuleShell
       title="Progresso"
-      icon={<TrendingUp className="size-6" />}
-      headline="Análises em construção"
-      description="Seu peso inicial e sua meta principal já estão salvos."
-      features={[
-        'Pesagens e tendência de 7 dias',
-        'Medidas corporais e composição',
-        'Metas secundárias',
-        'Gráficos de volume e força',
-      ]}
+      description="Peso corporal, medidas e a evolução das suas metas ao longo do tempo."
+      empty={{
+        icon: <TrendingUp className="size-6" />,
+        title: 'Sem histórico para analisar',
+        description: 'Seu peso inicial e sua meta principal já estão salvos. Gráficos e novas pesagens chegam na próxima atualização.',
+      }}
+      upcoming={['Pesagens e tendência de 7 dias', 'Medidas corporais e composição', 'Metas secundárias', 'Gráficos de volume e força']}
     />
   );
 }

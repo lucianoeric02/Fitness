@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Button, IconButton } from '@/components/ui/Button';
-import { DateField, NumberField, Segmented, TextField } from '@/components/ui/Field';
+import { DateInput, NumberInput, Segmented, Input } from '@/components/ui/Field';
 import { useToast } from '@/components/ui/Toast';
 import { completeOnboarding } from '@/data/repos/onboarding';
 import { DEFAULT_TARGETS } from '@/data/repos/targets';
@@ -88,16 +88,16 @@ export function OnboardingPage() {
   const delta = weightN !== null && targetWeightN !== null ? targetWeightN - weightN : null;
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-lg flex-col px-5 pb-[calc(var(--sab)+1.25rem)] pt-[calc(var(--sat)+1rem)]">
+    <div className="mx-auto flex min-h-dvh max-w-app flex-col px-5 pb-safe-5 pt-safe-4">
       <div className="flex h-11 items-center justify-between">
         {step > 0 ? (
           <IconButton label="Voltar" className="-ml-3 text-ink" onClick={() => setStep(step - 1)}>
             <ArrowLeft className="size-5" />
           </IconButton>
         ) : (
-          <span className="font-display text-lg font-bold uppercase tracking-[0.16em] text-accent">Iron Track</span>
+          <span className="font-display text-lg font-bold uppercase tracking-brand text-accent">Iron Track</span>
         )}
-        <span className="text-[13px] font-medium text-muted">
+        <span className="text-caption font-medium text-muted">
           {step + 1} de {STEPS.length}
         </span>
       </div>
@@ -119,10 +119,10 @@ export function OnboardingPage() {
         {step === 0 && (
           <section className="mt-8 flex flex-col gap-5">
             <div>
-              <h1 className="text-[28px] font-semibold leading-tight tracking-tight">Vamos montar seu painel</h1>
-              <p className="mt-2 text-[15px] text-muted">Seus dados ficam só neste aparelho. Nada é enviado para a internet.</p>
+              <h1 className="text-title font-semibold leading-tight tracking-tight">Vamos montar seu painel</h1>
+              <p className="mt-2 text-body text-muted">Seus dados ficam só neste aparelho. Nada é enviado para a internet.</p>
             </div>
-            <TextField label="Como quer ser chamado?" value={name} onChange={setName} autoComplete="given-name" maxLength={40} error={err('name')} />
+            <Input label="Como quer ser chamado?" value={name} onChange={setName} autoComplete="given-name" maxLength={40} error={err('name')} />
             <Segmented
               label="Sexo (opcional)"
               value={sex}
@@ -133,8 +133,8 @@ export function OnboardingPage() {
               ]}
             />
             <div className="grid grid-cols-2 gap-3">
-              <NumberField label="Altura (opcional)" suffix="cm" decimal={false} value={height} onChange={setHeight} error={err('height')} />
-              <DateField label="Nascimento (opcional)" value={birthDate} onChange={setBirthDate} max={today} error={err('birthDate')} />
+              <NumberInput label="Altura (opcional)" suffix="cm" decimal={false} value={height} onChange={setHeight} error={err('height')} />
+              <DateInput label="Nascimento (opcional)" value={birthDate} onChange={setBirthDate} max={today} error={err('birthDate')} />
             </div>
           </section>
         )}
@@ -142,20 +142,20 @@ export function OnboardingPage() {
         {step === 1 && (
           <section className="mt-8 flex flex-col gap-5">
             <div>
-              <h1 className="text-[28px] font-semibold leading-tight tracking-tight">Peso corporal</h1>
-              <p className="mt-2 text-[15px] text-muted">É a sua métrica principal de progresso. O peso de hoje vira o ponto de partida.</p>
+              <h1 className="text-title font-semibold leading-tight tracking-tight">Peso corporal</h1>
+              <p className="mt-2 text-body text-muted">É a sua métrica principal de progresso. O peso de hoje vira o ponto de partida.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <NumberField label="Peso atual" suffix="kg" value={weight} onChange={setWeight} error={err('weight')} autoFocus />
-              <NumberField label="Peso-meta" suffix="kg" value={targetWeight} onChange={setTargetWeight} error={err('targetWeight')} />
+              <NumberInput label="Peso atual" suffix="kg" value={weight} onChange={setWeight} error={err('weight')} autoFocus />
+              <NumberInput label="Peso-meta" suffix="kg" value={targetWeight} onChange={setTargetWeight} error={err('targetWeight')} />
             </div>
             {delta !== null && Math.abs(delta) > 0 && (
-              <p className="rounded-2xl border border-accent/20 bg-accent/8 px-4 py-3 text-[15px]">
+              <p className="rounded-control border border-accent/20 bg-accent/8 px-4 py-3 text-body">
                 Objetivo: <b className="tabular text-accent">{formatSigned(delta)} kg</b>{' '}
                 <span className="text-muted">{delta > 0 ? 'de ganho' : 'de redução'}</span>
               </p>
             )}
-            <DateField
+            <DateInput
               label="Data-alvo (opcional)"
               value={targetDate}
               onChange={setTargetDate}
@@ -169,8 +169,8 @@ export function OnboardingPage() {
         {step === 2 && (
           <section className="mt-8 flex flex-col gap-5">
             <div>
-              <h1 className="text-[28px] font-semibold leading-tight tracking-tight">Metas diárias</h1>
-              <p className="mt-2 text-[15px] text-muted">Você define os números. Dá para ajustar a qualquer momento em Mais → Metas diárias.</p>
+              <h1 className="text-title font-semibold leading-tight tracking-tight">Metas diárias</h1>
+              <p className="mt-2 text-body text-muted">Você define os números. Dá para ajustar a qualquer momento em Mais → Metas diárias.</p>
             </div>
             <TargetsForm draft={targets} onChange={setTargets} showErrors={showErrors} bodyWeightKg={weightN} />
           </section>

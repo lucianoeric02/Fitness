@@ -1,5 +1,7 @@
 import { CalendarDays, Database, Droplets, Settings, Target, UserRound } from 'lucide-react';
-import { ListGroup, ListRow, PageBody, PageHeader } from '@/components/ui/Page';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { ListGroup, ListRow } from '@/components/ui/List';
 import { useProfile, useTargetForDay } from '@/hooks/data';
 import { useToday } from '@/hooks/useToday';
 import { formatNumber } from '@/lib/numbers';
@@ -11,8 +13,8 @@ export function MorePage() {
 
   return (
     <>
-      <PageHeader title="Mais" />
-      <PageBody className="gap-5">
+      <AppHeader title="Mais" description="Perfil, rotina, configurações e seus dados." />
+      <PageContainer className="gap-5">
         <ListGroup title="Você">
           <ListRow icon={<UserRound className="size-5" />} title="Perfil" subtitle={profile?.name ?? 'Nome, altura e meta de peso'} to="/mais/perfil" />
           <ListRow
@@ -23,9 +25,9 @@ export function MorePage() {
           />
         </ListGroup>
 
-        <ListGroup title="Em breve">
-          <ListRow icon={<Droplets className="size-5" />} title="Hidratação" subtitle="Registro rápido de água" disabled />
-          <ListRow icon={<CalendarDays className="size-5" />} title="Planejamento" subtitle="Semana de treinos e lembretes" disabled />
+        <ListGroup title="Rotina">
+          <ListRow icon={<Droplets className="size-5" />} title="Hidratação" subtitle="Água do dia e meta" to="/mais/hidratacao" />
+          <ListRow icon={<CalendarDays className="size-5" />} title="Planejamento" subtitle="Semana de treinos e lembretes" to="/mais/planejamento" />
         </ListGroup>
 
         <ListGroup title="App">
@@ -33,8 +35,8 @@ export function MorePage() {
           <ListRow icon={<Database className="size-5" />} title="Dados e backup" subtitle="Exportar, importar e apagar" to="/mais/dados" />
         </ListGroup>
 
-        <p className="pt-2 text-center text-[12px] text-faint">Iron Track {__APP_VERSION__} · dados armazenados apenas neste aparelho</p>
-      </PageBody>
+        <p className="pt-2 text-center text-xs text-faint">Iron Track {__APP_VERSION__} · dados armazenados apenas neste aparelho</p>
+      </PageContainer>
     </>
   );
 }

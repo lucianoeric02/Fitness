@@ -3,7 +3,7 @@ import { LoaderCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type Size = 'md' | 'lg' | 'sm';
+type Size = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -15,16 +15,16 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-accent text-accent-ink shadow-[0_8px_24px_-12px_rgba(163,230,53,0.6)] active:bg-accent-strong disabled:bg-elevated disabled:text-faint disabled:shadow-none',
-  secondary: 'bg-elevated text-ink border border-line active:bg-line disabled:text-faint',
+    'bg-accent text-accent-ink shadow-accent active:bg-accent-strong disabled:bg-elevated disabled:text-faint disabled:shadow-none',
+  secondary: 'border border-line bg-elevated text-ink active:bg-line disabled:text-faint',
   ghost: 'bg-transparent text-muted active:bg-elevated disabled:text-faint',
-  danger: 'bg-danger/12 text-danger border border-danger/30 active:bg-danger/20 disabled:opacity-50',
+  danger: 'border border-danger/30 bg-danger/12 text-danger active:bg-danger/20 disabled:opacity-50',
 };
 
 const sizes: Record<Size, string> = {
-  sm: 'h-10 px-3.5 text-sm rounded-xl gap-1.5',
-  md: 'h-12 px-5 text-[15px] rounded-2xl gap-2',
-  lg: 'h-14 px-6 text-base rounded-2xl gap-2',
+  sm: 'h-10 gap-1.5 rounded-xl px-3.5 text-sm',
+  md: 'h-12 gap-2 rounded-control px-5 text-body',
+  lg: 'h-14 gap-2 rounded-control px-6 text-base',
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -38,7 +38,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cn(
-        'inline-flex items-center justify-center font-semibold tracking-tight transition-[background-color,transform,opacity] duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:active:scale-100',
+        'pressable inline-flex items-center justify-center font-semibold tracking-tight disabled:cursor-not-allowed',
         variants[variant],
         sizes[size],
         block && 'w-full',
@@ -52,6 +52,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   );
 });
 
+export const PrimaryButton = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'variant'>>(function PrimaryButton(props, ref) {
+  return <Button ref={ref} variant="primary" {...props} />;
+});
+
+export const SecondaryButton = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'variant'>>(function SecondaryButton(props, ref) {
+  return <Button ref={ref} variant="secondary" {...props} />;
+});
+
+/** Icon-only button with a 44px touch target and required accessible label. */
 export function IconButton({
   label,
   className,
@@ -64,7 +73,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        'inline-flex size-11 items-center justify-center rounded-full text-muted transition-colors active:bg-elevated disabled:opacity-40',
+        'pressable inline-flex size-touch items-center justify-center rounded-full text-muted active:bg-elevated disabled:opacity-40',
         className,
       )}
       {...rest}

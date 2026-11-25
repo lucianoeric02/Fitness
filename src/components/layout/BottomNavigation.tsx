@@ -10,13 +10,22 @@ export const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; icon: LucideI
   { to: '/mais', label: 'Mais', icon: LayoutGrid },
 ];
 
-export function BottomNav() {
+/**
+ * Fixed bottom navigation. `hidden` slides it away while the keyboard is
+ * open so a tap aimed at the keyboard can't switch screens mid-form.
+ */
+export function BottomNavigation({ hidden = false }: { hidden?: boolean }) {
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line/70 bg-bg/92 pb-safe px-safe backdrop-blur-md"
+      aria-hidden={hidden || undefined}
+      inert={hidden}
+      className={cn(
+        'fixed inset-x-0 bottom-0 z-40 border-t border-line/70 bg-bg/92 pb-safe px-safe backdrop-blur-md transition-transform duration-base ease-out-expo',
+        hidden && 'translate-y-full',
+      )}
     >
-      <ul className="mx-auto grid h-[var(--nav-h)] max-w-lg grid-cols-5">
+      <ul className="mx-auto grid h-nav max-w-app grid-cols-5">
         {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
           <li key={to}>
             <NavLink
@@ -24,7 +33,7 @@ export function BottomNav() {
               end={end}
               className={({ isActive }) =>
                 cn(
-                  'group flex h-full flex-col items-center justify-center gap-1 text-[11px] font-semibold tracking-wide transition-colors',
+                  'flex h-full flex-col items-center justify-center gap-1 text-micro font-semibold tracking-wide transition-colors duration-fast',
                   isActive ? 'text-ink' : 'text-faint active:text-muted',
                 )
               }
@@ -33,11 +42,11 @@ export function BottomNav() {
                 <>
                   <span
                     className={cn(
-                      'flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-200',
-                      isActive ? 'bg-accent/15 text-accent' : '',
+                      'flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-base',
+                      isActive && 'bg-accent/15 text-accent',
                     )}
                   >
-                    <Icon className="size-[22px]" strokeWidth={isActive ? 2.3 : 1.9} />
+                    <Icon className="size-5.5" strokeWidth={isActive ? 2.3 : 1.9} />
                   </span>
                   {label}
                 </>

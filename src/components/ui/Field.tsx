@@ -17,16 +17,16 @@ function FieldShell({
 }: BaseFieldProps & { id: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-medium text-muted">
+      <label htmlFor={id} className="text-caption font-medium text-muted">
         {label}
       </label>
       {children}
       {error ? (
-        <p id={`${id}-msg`} role="alert" className="text-[13px] text-danger">
+        <p id={`${id}-msg`} role="alert" className="text-caption text-danger">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-msg`} className="text-[13px] text-faint">
+        <p id={`${id}-msg`} className="text-caption text-faint">
           {hint}
         </p>
       ) : null}
@@ -36,13 +36,14 @@ function FieldShell({
 
 const inputClass = (error?: string | null) =>
   cn(
-    'h-13 w-full rounded-2xl border bg-elevated px-4 text-base text-ink placeholder:text-faint transition-colors focus:outline-none',
+    'h-13 w-full rounded-control border bg-elevated px-4 text-base text-ink placeholder:text-faint transition-colors duration-fast focus:outline-none',
     error ? 'border-danger/70 focus:border-danger' : 'border-line focus:border-accent/70',
   );
 
 type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> & BaseFieldProps;
 
-export function TextField({
+/** Single-line text input with label, hint and error. */
+export function Input({
   label,
   hint,
   error,
@@ -67,10 +68,10 @@ export function TextField({
 }
 
 /**
- * Numeric input that accepts pt-BR decimals ("82,5"). Uses a text input with
+ * Numeric input (NumberInput) that accepts pt-BR decimals ("82,5"). Uses a text input with
  * a numeric keyboard so the comma key is available on Android.
  */
-export function NumberField({
+export function NumberInput({
   label,
   hint,
   error,
@@ -97,11 +98,11 @@ export function NumberField({
           }}
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={error || hint ? `${id}-msg` : undefined}
-          className={cn(inputClass(error), 'tabular text-lg font-semibold', suffix && 'pr-14')}
+          className={cn(inputClass(error), 'tabular text-lg font-semibold', suffix && (suffix.length <= 2 ? 'pl-3 pr-8' : 'pr-14'))}
           {...rest}
         />
         {suffix && (
-          <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-medium text-muted">
+          <span className={cn('pointer-events-none absolute inset-y-0 flex items-center text-sm font-medium text-muted', suffix.length <= 2 ? 'right-3' : 'right-4')}>
             {suffix}
           </span>
         )}
@@ -110,7 +111,7 @@ export function NumberField({
   );
 }
 
-export function DateField({
+export function DateInput({
   label,
   hint,
   error,
@@ -127,7 +128,7 @@ export function DateField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={Boolean(error) || undefined}
-        className={cn(inputClass(error), '[color-scheme:dark]')}
+        className={cn(inputClass(error), 'scheme-dark')}
         {...rest}
       />
     </FieldShell>
@@ -147,8 +148,8 @@ export function Segmented<T extends string>({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[13px] font-medium text-muted">{label}</span>
-      <div role="radiogroup" aria-label={label} className="grid auto-cols-fr grid-flow-col gap-1 rounded-2xl border border-line bg-elevated p-1">
+      <span className="text-caption font-medium text-muted">{label}</span>
+      <div role="radiogroup" aria-label={label} className="grid auto-cols-fr grid-flow-col gap-1 rounded-control border border-line bg-elevated p-1">
         {options.map((o) => {
           const active = o.value === value;
           return (
@@ -159,7 +160,7 @@ export function Segmented<T extends string>({
               aria-checked={active}
               onClick={() => onChange(o.value)}
               className={cn(
-                'h-11 rounded-xl text-sm font-semibold transition-colors',
+                'pressable h-11 rounded-xl text-sm font-semibold',
                 active ? 'bg-ink text-bg' : 'text-muted active:bg-line',
               )}
             >

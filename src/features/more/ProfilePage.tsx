@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardTitle } from '@/components/ui/Card';
-import { DateField, NumberField, Segmented, TextField } from '@/components/ui/Field';
-import { PageBody, PageHeader } from '@/components/ui/Page';
+import { Card } from '@/components/ui/Card';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { DateInput, NumberInput, Segmented, Input } from '@/components/ui/Field';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { LoadingScreen } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
 import { savePrimaryWeightGoal } from '@/data/repos/body';
@@ -11,6 +13,7 @@ import { RULES, validateBirthDate, validateName, validateNumber } from '@/domain
 import type { Goal, Profile, Sex } from '@/domain/models';
 import { usePrimaryGoal, useProfile, useWeightSummary } from '@/hooks/data';
 import { useToday } from '@/hooks/useToday';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { ageOn } from '@/lib/dates';
 import { formatNumber, parseDecimal, toInputValue } from '@/lib/numbers';
 
@@ -37,6 +40,7 @@ function ProfileForm({ profile, goal, currentWeight }: { profile: Profile | null
   const snapshot = JSON.stringify([name.trim(), sex, height, birthDate, targetWeight, targetDate]);
   const [savedSnapshot, setSavedSnapshot] = useState(snapshot);
   const dirty = snapshot !== savedSnapshot;
+  const unsavedGuard = useUnsavedChangesGuard(dirty && !saving);
 
   const heightN = parseDecimal(height);
   const targetN = parseDecimal(targetWeight);
@@ -79,10 +83,10 @@ function ProfileForm({ profile, goal, currentWeight }: { profile: Profile | null
 
   return (
     <>
-      <PageHeader title="Perfil" back="/mais" />
-      <PageBody className="gap-4">
+      <AppHeader title="Perfil" back="/mais" />
+      <PageContainer className="gap-4">
         <Card className="flex flex-col gap-4">
-          <TextField label="Nome" value={name} onChange={setName} maxLength={40} error={err('name')} />
+          <Input label="Nome" value={name} onChange={setName} maxLength={40} error={err('name')} />
           <Segmented
             label="Sexo"
             value={sex}
@@ -93,8 +97,8 @@ function ProfileForm({ profile, goal, currentWeight }: { profile: Profile | null
             ]}
           />
           <div className="grid grid-cols-2 gap-3">
-            <NumberField label="Altura" suffix="cm" decimal={false} value={height} onChange={setHeight} error={err('height')} />
-            <DateField
+            <NumberInput label="Altura" suffix="cm" decimal={false} value={height} onChange={setHeight} error={err('height')} />
+            <DateInput
               label="Nascimento"
               value={birthDate}
               onChange={setBirthDate}
@@ -106,9 +110,9 @@ function ProfileForm({ profile, goal, currentWeight }: { profile: Profile | null
         </Card>
 
         <Card className="flex flex-col gap-4">
-          <CardTitle>Meta de peso</CardTitle>
+          <SectionHeader title="Meta de peso" />
           {goal && (
-            <p className="-mt-2 text-[13px] text-muted">
+            <p className="-mt-2 text-caption text-muted">
               Ponto de partida: <b className="tabular text-ink">{formatNumber(goal.startValue, 1)} kg</b>
               {currentWeight !== null && (
                 <>
@@ -118,15 +122,16 @@ function ProfileForm({ profile, goal, currentWeight }: { profile: Profile | null
             </p>
           )}
           <div className="grid grid-cols-2 gap-3">
-            <NumberField label="Peso-meta" suffix="kg" value={targetWeight} onChange={setTargetWeight} error={err('targetWeight')} />
-            <DateField label="Data-alvo" value={targetDate} onChange={setTargetDate} min={today} error={err('targetDate')} />
+            <NumberInput label="Peso-meta" suffix="kg" value={targetWeight} onChange={setTargetWeight} error={err('targetWeight')} />
+            <DateInput label="Data-alvo" value={targetDate} onChange={setTargetDate} min={today} error={err('targetDate')} />
           </div>
         </Card>
 
         <Button size="lg" block loading={saving} disabled={!dirty} onClick={save}>
           {dirty ? 'Salvar alterações' : 'Tudo salvo'}
         </Button>
-      </PageBody>
+      </PageContainer>
+      {unsavedGuard}
     </>
   );
 }

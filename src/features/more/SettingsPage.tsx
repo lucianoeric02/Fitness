@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/Card';
 import { Segmented } from '@/components/ui/Field';
-import { PageBody, PageHeader } from '@/components/ui/Page';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { LoadingScreen } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
 import { updateSettings } from '@/data/repos/profile';
@@ -30,8 +31,8 @@ export function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Configurações" back="/mais" />
-      <PageBody className="gap-4">
+      <AppHeader title="Configurações" back="/mais" />
+      <PageContainer className="gap-4">
         <Card className="flex flex-col gap-2">
           <Segmented
             label="A semana começa"
@@ -42,7 +43,7 @@ export function SettingsPage() {
               { value: '0', label: 'Domingo' },
             ]}
           />
-          <p className="text-[13px] text-faint">Usado nos resumos semanais e no planejamento.</p>
+          <p className="text-caption text-faint">Usado nos resumos semanais e no planejamento.</p>
         </Card>
         <Card className="flex flex-col gap-2">
           <Segmented
@@ -51,14 +52,14 @@ export function SettingsPage() {
             onChange={(v) => apply({ dayStartHour: Number(v) })}
             options={DAY_START_OPTIONS}
           />
-          <p className="text-[13px] text-faint">
+          <p className="text-caption text-faint">
             Se você treina ou come tarde, registros feitos antes desse horário contam para o dia anterior.
           </p>
         </Card>
-        <Card className="text-[14px] text-muted">
+        <Card className="text-sm text-muted">
           Unidades: quilogramas, centímetros e mililitros. Idioma: português (Brasil).
         </Card>
-      </PageBody>
+      </PageContainer>
     </>
   );
 }

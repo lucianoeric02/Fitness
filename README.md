@@ -38,6 +38,24 @@ src/
 android/          projeto nativo Capacitor
 ```
 
+## Design system
+
+Tokens em `src/styles/index.css` (`@theme`), usados como utilitários Tailwind. Componentes não usam valores arbitrários.
+
+| Grupo | Tokens |
+| --- | --- |
+| Cores | `bg`, `surface`, `elevated`, `line`, `ink`, `muted`, `faint`, `accent`, macros e estados |
+| Tipografia | `text-micro` 11, `text-xs` 12, `text-caption` 13, `text-sm` 14, `text-body` 15, `text-title` 28, `text-metric` 34; `font-display` para números |
+| Espaçamento | escala de 4 px do Tailwind; `nav`, `touch` (44 px) |
+| Raios | `rounded-control`, `rounded-card`, `rounded-sheet` |
+| Elevação | nível 0 `bg` → 1 `surface` → 2 `elevated`; sombras `raised`, `overlay`, `accent` |
+| Movimento | `duration-fast/base/slow`, `ease-out-expo`, `pressable`, `animate-page-in`; respeita *reduced motion* |
+| Layout | `max-w-app`, breakpoint `xs` (360 px), `pt-safe-*`, `pb-safe-*`, `pb-nav-safe` |
+
+Componentes (`src/components`): `AppHeader`, `BottomNavigation`, `PageContainer`, `TileGrid`, `SectionHeader`, `Card`, `MetricCard`, `ProgressBar`, `ProgressRing`, `Button`/`PrimaryButton`/`SecondaryButton`, `IconButton`, `Input`, `NumberInput`, `DateInput`, `Segmented`, `Modal`, `BottomSheet`, `ConfirmSheet`, `Toast`, `EmptyState`, `LoadingSkeleton`, `ErrorState`, `ListGroup`/`ListRow`.
+
+Proteções de navegação: a barra inferior se esconde enquanto o teclado está aberto, e formulários com alterações pedem confirmação antes de sair (`useUnsavedChangesGuard`).
+
 ## Princípios de dados
 
 - **IDs UUID** e `createdAt`/`updatedAt` em todo registro, prontos para sincronização futura.

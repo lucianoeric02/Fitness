@@ -48,7 +48,7 @@ export function ConfirmSheet({
         </div>
       }
     >
-      <div className="text-[15px] leading-relaxed text-muted">{description}</div>
+      <div className="text-body text-muted">{description}</div>
     </BottomSheet>
   );
 }

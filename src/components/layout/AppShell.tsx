@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
-import { BottomNav } from './BottomNav';
+import { useEditingFocus } from '@/hooks/useEditingFocus';
+import { BottomNavigation } from './BottomNavigation';
 
 export function AppShell() {
   const { pathname } = useLocation();
+  const editing = useEditingFocus();
 
   // Each screen starts at the top.
   useEffect(() => {
@@ -11,11 +13,14 @@ export function AppShell() {
   }, [pathname]);
 
   return (
-    <div className="mx-auto min-h-full max-w-lg px-safe">
-      <main className="pb-[calc(var(--nav-h)+var(--sab)+1rem)]">
-        <Outlet />
+    <div className="mx-auto min-h-full max-w-app px-safe">
+      <main className="pb-nav-safe">
+        {/* Keyed by route so each screen gets a short entrance transition. */}
+        <div key={pathname} className="animate-page-in">
+          <Outlet />
+        </div>
       </main>
-      <BottomNav />
+      <BottomNavigation hidden={editing} />
     </div>
   );
 }

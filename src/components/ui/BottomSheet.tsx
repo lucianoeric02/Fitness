@@ -1,12 +1,10 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { IconButton } from './Button';
+import { useOverlay } from './useOverlay';
 
-/**
- * Bottom sheet for quick actions. Closes on backdrop tap, Escape and the
- * Android back gesture (via a history entry).
- */
+/** Bottom sheet for quick actions; thumb-friendly on phones. */
 export function BottomSheet({
   open,
   onClose,
@@ -22,37 +20,7 @@ export function BottomSheet({
 }) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-
-  useEffect(() => {
-    if (!open) return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    // Back gesture closes the sheet instead of leaving the screen.
-    const marker = { sheet: titleId };
-    window.history.pushState(marker, '');
-    let closedByPop = false;
-    const onPop = () => {
-      closedByPop = true;
-      onCloseRef.current();
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCloseRef.current();
-    };
-    window.addEventListener('popstate', onPop);
-    window.addEventListener('keydown', onKey);
-    panelRef.current?.focus();
-
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener('popstate', onPop);
-      window.removeEventListener('keydown', onKey);
-      if (!closedByPop && window.history.state?.sheet === titleId) window.history.back();
-    };
-  }, [open, titleId]);
-
+  useOverlay(open, onClose, panelRef, titleId);
   if (!open) return null;
 
   return createPortal(
@@ -64,7 +32,7 @@ export function BottomSheet({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative flex max-h-[88dvh] animate-sheet-in flex-col rounded-t-[1.75rem] border-t border-line bg-surface pb-safe focus:outline-none"
+        className="relative mx-auto flex max-h-sheet w-full max-w-app animate-sheet-in flex-col rounded-t-sheet border-t border-line bg-surface pb-safe shadow-overlay focus:outline-none"
       >
         <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-line" aria-hidden />
         <div className="flex items-center justify-between px-5 pb-1 pt-2">

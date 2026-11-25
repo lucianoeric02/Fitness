@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { History } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardTitle } from '@/components/ui/Card';
-import { PageBody, PageHeader } from '@/components/ui/Page';
+import { Card } from '@/components/ui/Card';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { LoadingScreen } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
 import { DEFAULT_TARGETS, setTargetsFrom } from '@/data/repos/targets';
 import type { NutritionTarget } from '@/domain/models';
 import { useTargetForDay, useTargetHistory, useWeightSummary } from '@/hooks/data';
 import { useToday } from '@/hooks/useToday';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { formatShortDay, type DayKey } from '@/lib/dates';
 import { formatNumber } from '@/lib/numbers';
 import { parseTargetsDraft, TargetsForm, targetsToDraft } from './TargetsForm';
@@ -40,6 +43,7 @@ function TargetsEditor({
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
   const dirty = JSON.stringify(draft) !== saved;
+  const unsavedGuard = useUnsavedChangesGuard(dirty && !saving);
 
   const save = async () => {
     const { values } = parseTargetsDraft(draft);
@@ -64,11 +68,11 @@ function TargetsEditor({
 
   return (
     <>
-      <PageHeader title="Metas diárias" back="/mais" />
-      <PageBody className="gap-4">
+      <AppHeader title="Metas diárias" back="/mais" />
+      <PageContainer className="gap-4">
         <Card>
           <TargetsForm draft={draft} onChange={setDraft} showErrors={showErrors} bodyWeightKg={bodyWeightKg} />
-          <p className="mt-4 text-[13px] text-muted">
+          <p className="mt-4 text-caption text-muted">
             Alterações valem a partir de hoje. Dias anteriores mantêm as metas que estavam em vigor.
           </p>
         </Card>
@@ -79,10 +83,10 @@ function TargetsEditor({
 
         {past.length > 1 && (
           <Card>
-            <CardTitle icon={<History className="size-4" />}>Histórico</CardTitle>
+            <SectionHeader icon={<History className="size-4" />} title="Histórico" />
             <ul className="divide-y divide-line/60">
               {past.map((t) => (
-                <li key={t.id} className="flex items-center justify-between py-2.5 text-[14px]">
+                <li key={t.id} className="flex items-center justify-between py-2.5 text-sm">
                   <span className="text-muted">desde {formatShortDay(t.effectiveFrom)}</span>
                   <span className="tabular">
                     <b>{formatNumber(t.kcal)}</b> kcal · {formatNumber(t.proteinG)}P · {formatNumber(t.carbsG)}C · {formatNumber(t.fatG)}G
@@ -92,7 +96,8 @@ function TargetsEditor({
             </ul>
           </Card>
         )}
-      </PageBody>
+      </PageContainer>
+      {unsavedGuard}
     </>
   );
 }

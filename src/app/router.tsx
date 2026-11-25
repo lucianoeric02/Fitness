@@ -2,6 +2,8 @@ import { createHashRouter, Navigate, Outlet, useLocation, useRouteError } from '
 import { AppShell } from '@/components/layout/AppShell';
 import { ErrorState, LoadingScreen } from '@/components/ui/States';
 import { HomePage } from '@/features/home/HomePage';
+import { HydrationPage } from '@/features/hydration/HydrationPage';
+import { PlanningPage } from '@/features/planning/PlanningPage';
 import { DataPage } from '@/features/more/DataPage';
 import { MorePage } from '@/features/more/MorePage';
 import { ProfilePage } from '@/features/more/ProfilePage';
@@ -29,7 +31,7 @@ function RouteError() {
   const error = useRouteError();
   console.error(error);
   return (
-    <div className="pt-[calc(var(--sat)+3rem)]">
+    <div className="pt-safe-12">
       <ErrorState
         description="Esta tela encontrou um erro inesperado. Seus registros continuam salvos no aparelho."
         onRetry={() => window.location.reload()}
@@ -54,6 +56,8 @@ export const router = createHashRouter([
           { path: 'nutricao', element: <NutritionPage /> },
           { path: 'progresso', element: <ProgressPage /> },
           { path: 'mais', element: <MorePage /> },
+          { path: 'mais/hidratacao', element: <HydrationPage /> },
+          { path: 'mais/planejamento', element: <PlanningPage /> },
           { path: 'mais/perfil', element: <ProfilePage /> },
           { path: 'mais/metas', element: <TargetsPage /> },
           { path: 'mais/configuracoes', element: <SettingsPage /> },

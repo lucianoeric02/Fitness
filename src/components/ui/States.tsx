@@ -3,19 +3,20 @@ import { AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Button } from './Button';
 
-export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-2xl bg-elevated/70', className)} aria-hidden />;
+/** Placeholder block shown while content loads. */
+export function LoadingSkeleton({ className }: { className?: string }) {
+  return <div className={cn('animate-pulse rounded-control bg-elevated/70', className)} aria-hidden />;
 }
 
 export function LoadingScreen({ label = 'Carregando…' }: { label?: string }) {
   return (
-    <div className="flex flex-col gap-3 px-5 pt-6" role="status" aria-live="polite">
+    <div className="flex flex-col gap-3 px-5 pt-safe-6" role="status" aria-live="polite">
       <span className="sr-only">{label}</span>
-      <Skeleton className="h-8 w-40" />
-      <Skeleton className="h-52" />
-      <div className="grid grid-cols-2 gap-3">
-        <Skeleton className="h-32" />
-        <Skeleton className="h-32" />
+      <LoadingSkeleton className="h-8 w-40" />
+      <LoadingSkeleton className="h-52" />
+      <div className="grid grid-cols-1 gap-3 xs:grid-cols-2">
+        <LoadingSkeleton className="h-32" />
+        <LoadingSkeleton className="h-32" />
       </div>
     </div>
   );
@@ -40,7 +41,7 @@ export function EmptyState({
         {icon}
       </div>
       <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
-      <p className="mt-1.5 max-w-xs text-[15px] leading-relaxed text-muted">{description}</p>
+      <p className="mt-1.5 max-w-xs text-body text-muted">{description}</p>
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -61,7 +62,7 @@ export function ErrorState({
         <AlertTriangle className="size-6" />
       </div>
       <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="mt-1.5 max-w-xs text-[15px] text-muted">{description}</p>
+      <p className="mt-1.5 max-w-xs text-body text-muted">{description}</p>
       {onRetry && (
         <Button variant="secondary" className="mt-5" onClick={onRetry}>
           Tentar novamente

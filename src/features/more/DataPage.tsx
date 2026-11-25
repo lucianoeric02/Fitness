@@ -3,9 +3,11 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Download, Trash2, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Button } from '@/components/ui/Button';
-import { Card, CardTitle } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ConfirmSheet } from '@/components/ui/ConfirmSheet';
-import { PageBody, PageHeader } from '@/components/ui/Page';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { useToast } from '@/components/ui/Toast';
 import {
   BackupError,
@@ -64,21 +66,21 @@ export function DataPage() {
 
   return (
     <>
-      <PageHeader title="Dados e backup" back="/mais" />
-      <PageBody className="gap-4">
+      <AppHeader title="Dados e backup" back="/mais" />
+      <PageContainer className="gap-4">
         <Card>
-          <CardTitle>Neste aparelho</CardTitle>
-          <p className="text-[15px]">
+          <SectionHeader title="Neste aparelho" />
+          <p className="text-body">
             <b className="tabular">{totalRecords === undefined ? '…' : formatNumber(totalRecords)}</b>{' '}
             <span className="text-muted">registros salvos localmente</span>
           </p>
-          <p className="mt-2 text-[13px] text-muted">
+          <p className="mt-2 text-caption text-muted">
             Desinstalar o app ou limpar os dados dele no Android apaga tudo. Exporte um backup com frequência e guarde no Google Drive.
           </p>
         </Card>
 
         <Card className="flex flex-col gap-3">
-          <CardTitle>Backup</CardTitle>
+          <SectionHeader title="Backup" />
           <Button variant="primary" block loading={exporting} icon={<Download className="size-5" />} onClick={onExport}>
             Exportar backup
           </Button>
@@ -95,12 +97,12 @@ export function DataPage() {
         </Card>
 
         <Card className="flex flex-col gap-3 border-danger/20">
-          <CardTitle>Zona de risco</CardTitle>
+          <SectionHeader title="Zona de risco" />
           <Button variant="danger" block icon={<Trash2 className="size-5" />} onClick={() => setConfirmWipe(true)}>
             Apagar todos os dados
           </Button>
         </Card>
-      </PageBody>
+      </PageContainer>
 
       <ConfirmSheet
         open={pending !== null}

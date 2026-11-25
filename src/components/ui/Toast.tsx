@@ -41,13 +41,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={api}>
       {children}
       {createPortal(
-        <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex flex-col items-center gap-2 px-4 pt-[calc(var(--sat)+0.75rem)]" aria-live="polite">
+        <div className="pointer-events-none fixed inset-x-0 top-0 z-60 flex flex-col items-center gap-2 px-4 pt-safe-3" aria-live="polite">
           {items.map((t) => (
             <div
               key={t.id}
               role={t.kind === 'error' ? 'alert' : 'status'}
               className={cn(
-                'pointer-events-auto flex w-full max-w-sm animate-toast-in items-center gap-3 rounded-2xl border px-4 py-3 text-[15px] font-medium shadow-2xl shadow-black/40',
+                'pointer-events-auto flex w-full max-w-sm animate-toast-in items-center gap-3 rounded-control border px-4 py-3 text-body font-medium shadow-overlay',
                 'border-line bg-elevated text-ink',
               )}
             >

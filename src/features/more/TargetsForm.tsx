@@ -1,5 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
-import { NumberField } from '@/components/ui/Field';
+import { NumberInput } from '@/components/ui/Field';
 import { caloriesFromMacros, macroCalorieSplit, macroTargetMismatch } from '@/domain/calc/nutrition';
 import { RULES, validateNumber } from '@/domain/validation';
 import type { TargetValues } from '@/data/repos/targets';
@@ -68,22 +68,22 @@ export function TargetsForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <NumberField label="Calorias por dia" suffix="kcal" decimal={false} value={draft.kcal} onChange={set('kcal')} error={err('kcal')} />
+      <NumberInput label="Calorias por dia" suffix="kcal" decimal={false} value={draft.kcal} onChange={set('kcal')} error={err('kcal')} />
 
       <div className="grid grid-cols-3 gap-2.5">
-        <NumberField label="Proteína" suffix="g" value={draft.proteinG} onChange={set('proteinG')} error={err('proteinG')} />
-        <NumberField label="Carbo" suffix="g" value={draft.carbsG} onChange={set('carbsG')} error={err('carbsG')} />
-        <NumberField label="Gordura" suffix="g" value={draft.fatG} onChange={set('fatG')} error={err('fatG')} />
+        <NumberInput label="Proteína" suffix="g" value={draft.proteinG} onChange={set('proteinG')} error={err('proteinG')} />
+        <NumberInput label="Carbo" suffix="g" value={draft.carbsG} onChange={set('carbsG')} error={err('carbsG')} />
+        <NumberInput label="Gordura" suffix="g" value={draft.fatG} onChange={set('fatG')} error={err('fatG')} />
       </div>
 
       {macroKcal > 0 && (
-        <div className="rounded-2xl border border-line/70 bg-bg/40 p-3.5">
+        <div className="rounded-control border border-line/70 bg-bg/40 p-3.5">
           <div className="flex h-2 overflow-hidden rounded-full bg-elevated" aria-hidden>
             <div style={{ width: `${split.protein * 100}%`, background: 'var(--color-protein)' }} />
             <div style={{ width: `${split.carbs * 100}%`, background: 'var(--color-carbs)' }} />
             <div style={{ width: `${split.fat * 100}%`, background: 'var(--color-fat)' }} />
           </div>
-          <div className="mt-2.5 flex justify-between text-[13px] text-muted">
+          <div className="mt-2.5 flex justify-between text-caption text-muted">
             <span>
               <b className="text-protein">{Math.round(split.protein * 100)}%</b> prot.
             </span>
@@ -94,7 +94,7 @@ export function TargetsForm({
               <b className="text-fat">{Math.round(split.fat * 100)}%</b> gord.
             </span>
           </div>
-          <p className="mt-2 text-[13px] text-muted">
+          <p className="mt-2 text-caption text-muted">
             Os macros somam <b className="tabular text-ink">{formatNumber(macroKcal)} kcal</b>
             {perKg !== null && (
               <>
@@ -103,7 +103,7 @@ export function TargetsForm({
             )}
           </p>
           {mismatch.significant && kcal > 0 && (
-            <p className="mt-2 flex items-start gap-2 text-[13px] text-warning">
+            <p className="mt-2 flex items-start gap-2 text-caption text-warning">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
               <span>
                 Diferença de {formatNumber(Math.abs(mismatch.diff))} kcal entre a meta calórica e a soma dos macros.
@@ -114,7 +114,7 @@ export function TargetsForm({
         </div>
       )}
 
-      <NumberField
+      <NumberInput
         label="Água por dia"
         suffix="ml"
         decimal={false}
