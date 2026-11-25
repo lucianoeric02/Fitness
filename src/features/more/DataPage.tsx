@@ -22,6 +22,7 @@ import {
 import { db, TABLE_NAMES } from '@/data/db';
 import { saveTextFile } from '@/services/fileExport';
 import { removeSeedExercises } from '@/data/repos/exercises';
+import { removeSeedFoods } from '@/data/repos/foods';
 import { formatNumber } from '@/lib/numbers';
 
 export function DataPage() {
@@ -33,6 +34,8 @@ export function DataPage() {
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [confirmSeed, setConfirmSeed] = useState(false);
   const seedCount = useLiveQuery(async () => (await db.exercises.toArray()).filter((e) => e.isSeed && !e.archivedAt).length, []);
+  const seedFoodCount = useLiveQuery(async () => (await db.foods.toArray()).filter((f) => f.isSeed && !f.archivedAt).length, []);
+  const [confirmSeedFoods, setConfirmSeedFoods] = useState(false);
 
   const totalRecords = useLiveQuery(async () => {
     const counts = await Promise.all(TABLE_NAMES.map((t) => db.table(t).count()));
@@ -110,6 +113,14 @@ export function DataPage() {
             </Button>
           </Card>
         )}
+        {(seedFoodCount ?? 0) > 0 && (
+          <Card className="flex flex-col gap-3">
+            <p className="text-caption text-muted">{seedFoodCount} alimentos do catálogo inicial. Registros já feitos não mudam ao remover.</p>
+            <Button variant="secondary" block onClick={() => setConfirmSeedFoods(true)}>
+              Remover alimentos de exemplo
+            </Button>
+          </Card>
+        )}
 
         <Card className="flex flex-col gap-3 border-danger/20">
           <SectionHeader title="Zona de risco" />
@@ -160,6 +171,18 @@ export function DataPage() {
           const r = await removeSeedExercises();
           setConfirmSeed(false);
           toast.success(`${r.deleted} removidos${r.archived ? `, ${r.archived} arquivados (em uso)` : ''}.`);
+        }}
+      />
+      <ConfirmSheet
+        open={confirmSeedFoods}
+        onClose={() => setConfirmSeedFoods(false)}
+        title="Remover alimentos de exemplo?"
+        confirmLabel="Remover"
+        description="Os alimentos do catálogo inicial saem da busca. Registros feitos continuam com os valores originais; os usados em modelos ficam arquivados."
+        onConfirm={async () => {
+          const r = await removeSeedFoods();
+          setConfirmSeedFoods(false);
+          toast.success(`${r.deleted} removidos${r.archived ? `, ${r.archived} arquivados (em modelos)` : ''}.`);
         }}
       />
       <ConfirmSheet

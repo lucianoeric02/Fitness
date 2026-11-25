@@ -107,7 +107,7 @@ describe('dashboard', () => {
     expect(links('Calorias: abrir nutrição')).toEqual(['#/nutricao']);
     expect(links('Macronutrientes: abrir nutrição')).toEqual(['#/nutricao']);
     expect(links('Abrir perfil')).toEqual(['#/mais/perfil']);
-    expect(links(/Adicionar alimento/)).toEqual(['#/nutricao']);
+    expect(links(/Adicionar alimento/)).toEqual(['#/nutricao/adicionar']);
     expect(links(/Iniciar treino/)).toEqual(['#/treino']);
     expect(links(/Histórico/)).toEqual(['#/mais/perfil/peso']);
     expect(links(/Ver todos/)).toEqual(['#/mais/objetivos']);

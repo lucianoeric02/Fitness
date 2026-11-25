@@ -36,7 +36,7 @@ export function AppHeader({
             <h1 className={back ? 'truncate text-xl font-semibold tracking-tight' : 'text-title font-semibold tracking-tight'}>{title}</h1>
           </div>
         </div>
-        {action}
+        {action && <div className="shrink-0">{action}</div>}
       </div>
       {description && <p className="mt-1 max-w-prose text-body text-muted">{description}</p>}
     </header>

@@ -17,6 +17,8 @@ import { EditProfilePage } from '@/features/profile/EditProfilePage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { SettingsPage } from '@/features/more/SettingsPage';
 import { TargetsPage } from '@/features/more/TargetsPage';
+import { AddFoodPage } from '@/features/nutrition/AddFoodPage';
+import { FoodFormPage, FoodsPage, MealsSettingsPage, TemplateEditPage, TemplatesPage } from '@/features/nutrition/ManagePages';
 import { NutritionPage } from '@/features/nutrition/NutritionPage';
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage';
 import { ProgressPage } from '@/features/progress/ProgressPage';
@@ -75,6 +77,13 @@ export const router = createHashRouter([
           { path: 'treino/historico', element: <HistoryPage /> },
           { path: 'treino/historico/:id', element: <SessionDetailPage /> },
           { path: 'nutricao', element: <NutritionPage /> },
+          { path: 'nutricao/adicionar', element: <AddFoodPage /> },
+          { path: 'nutricao/alimentos', element: <FoodsPage /> },
+          { path: 'nutricao/alimentos/novo', element: <FoodFormPage /> },
+          { path: 'nutricao/alimentos/:id', element: <FoodFormPage /> },
+          { path: 'nutricao/modelos', element: <TemplatesPage /> },
+          { path: 'nutricao/modelos/:id', element: <TemplateEditPage /> },
+          { path: 'nutricao/refeicoes', element: <MealsSettingsPage /> },
           { path: 'progresso', element: <ProgressPage /> },
           { path: 'mais', element: <MorePage /> },
           { path: 'mais/hidratacao', element: <HydrationPage /> },

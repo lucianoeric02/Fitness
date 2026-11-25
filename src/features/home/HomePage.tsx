@@ -432,7 +432,7 @@ function QuickActions({ onWeight, onWater }: { onWeight: () => void; onWater: ()
         <button type="button" className={cls} onClick={onWeight}>
           {content(<Scale className="size-5" />, 'Registrar peso')}
         </button>
-        <Link to="/nutricao" className={cls}>
+        <Link to="/nutricao/adicionar" className={cls}>
           {content(<UtensilsCrossed className="size-5" />, 'Adicionar alimento')}
         </Link>
         <button type="button" className={cls} onClick={onWater}>

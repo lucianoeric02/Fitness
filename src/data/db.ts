@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type {
+  MealDefinition,
   AppSettings,
   BodyCompositionEntry,
   BodyWeightEntry,
@@ -34,6 +35,7 @@ export class IronTrackDB extends Dexie {
   nutritionTargets!: EntityTable<NutritionTarget, 'id'>;
   foods!: EntityTable<Food, 'id'>;
   mealTemplates!: EntityTable<MealTemplate, 'id'>;
+  meals!: EntityTable<MealDefinition, 'id'>;
   foodEntries!: EntityTable<FoodEntry, 'id'>;
   waterEntries!: EntityTable<WaterEntry, 'id'>;
   bodyWeights!: EntityTable<BodyWeightEntry, 'id'>;
@@ -109,6 +111,28 @@ export class IronTrackDB extends Dexie {
             e.secondaryMuscles ??= [];
           });
       });
+
+    // v4: nutrition system. Customisable meals table; foods gain category/unit;
+    // template items keep a food-name snapshot.
+    this.version(4)
+      .stores({ meals: 'id, sortOrder', foods: 'id, name, category, updatedAt' })
+      .upgrade(async (tx) => {
+        await tx
+          .table('foods')
+          .toCollection()
+          .modify((f) => {
+            f.category ??= 'other';
+            f.unit ??= 'g';
+            f.servings ??= [];
+            f.favorite ??= false;
+          });
+        await tx
+          .table('mealTemplates')
+          .toCollection()
+          .modify((t) => {
+            t.items = (t.items ?? []).map((i: { foodName?: string }) => ({ ...i, foodName: i.foodName ?? 'Alimento' }));
+          });
+      });
   }
 }
 
@@ -132,6 +156,7 @@ export const TABLE_NAMES = [
   'nutritionTargets',
   'foods',
   'mealTemplates',
+  'meals',
   'foodEntries',
   'waterEntries',
   'bodyWeights',

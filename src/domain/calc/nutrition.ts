@@ -123,3 +123,38 @@ export function macroTargetMismatch(target: Pick<Nutrients, 'kcal' | 'proteinG' 
   const pct = target.kcal > 0 ? Math.abs(diff) / target.kcal : 0;
   return { fromMacros: round(fromMacros), diff: round(diff), significant: pct > 0.05 };
 }
+
+/**
+ * Rescales a logged entry's nutrient snapshot to a new quantity. Uses the
+ * snapshot itself (not the current food values), so editing quantity never
+ * pulls in later catalog changes.
+ */
+export function rescaleNutrients(snapshot: Nutrients, fromQty: number, toQty: number): Nutrients {
+  if (fromQty <= 0) return { ...ZERO_NUTRIENTS };
+  const f = toQty / fromQty;
+  return {
+    kcal: round(snapshot.kcal * f, 1),
+    proteinG: round(snapshot.proteinG * f, 1),
+    carbsG: round(snapshot.carbsG * f, 1),
+    fatG: round(snapshot.fatG * f, 1),
+    fiberG: round((snapshot.fiberG ?? 0) * f, 1),
+  };
+}
+
+/** Totals per meal id, for the meal breakdown. */
+export function totalsByMeal(entries: ReadonlyArray<Pick<FoodEntry, 'slot' | 'nutrients'>>): Map<string, Nutrients> {
+  const out = new Map<string, Nutrients>();
+  for (const e of entries) out.set(e.slot, sumNutrients([{ nutrients: out.get(e.slot) ?? { ...ZERO_NUTRIENTS } }, e]));
+  return out;
+}
+
+/** Validates per-100 values of a food. Returns pt-BR message or null. */
+export function validateFoodNutrients(n: Nutrients): string | null {
+  const vals = [n.kcal, n.proteinG, n.carbsG, n.fatG, n.fiberG ?? 0];
+  if (vals.some((v) => !Number.isFinite(v) || v < 0)) return 'Os valores nutricionais devem ser números positivos.';
+  if (n.kcal > 900) return 'Calorias acima de 900 por 100 g não são realistas.';
+  if (n.proteinG + n.carbsG + n.fatG > 100.5) return 'Proteína + carboidratos + gordura não podem passar de 100 g por 100 g.';
+  // Note: fiber is NOT capped by carbs — official tables (e.g. TACO avocado) report fiber > carbs due to methodology.
+  if ((n.fiberG ?? 0) > 100) return 'Fibras não podem passar de 100 g por 100 g.';
+  return null;
+}

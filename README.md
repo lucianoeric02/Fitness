@@ -66,6 +66,14 @@ Proteções de navegação: a barra inferior se esconde enquanto o teclado está
 - **Recordes**: maior carga, melhor 1RM estimado (Epley) e mais repetições, comparados apenas com sessões anteriores.
 - Catálogo inicial com ~80 exercícios (seed removível em Dados e backup).
 
+## Nutrição
+
+- **Catálogo local** de ~55 alimentos brasileiros comuns, por 100 g/ml, com porções de referência (base TACO/Unicamp; USDA quando a TACO não tem o item; "rótulo médio" para itens que variam por marca, como whey). Valores aproximados e editáveis; alimentos personalizados com marca, preparo e porções.
+- **Registro** com prévia proporcional (ex.: 130 kcal/100 g × 150 g = 195 kcal). Cada registro guarda um snapshot dos nutrientes: editar ou remover o alimento depois não altera dias passados; editar a quantidade reescala o próprio snapshot.
+- **Totais do dia e por refeição** são sempre calculados dos registros (nada é armazenado em duplicidade).
+- **Refeições personalizáveis** (renomear, reordenar, ocultar, criar), com metas opcionais por refeição.
+- **Modelos de refeição**: salvar refeição como modelo, editar, duplicar e aplicar em qualquer dia; "repetir do dia anterior".
+
 ## Princípios de dados
 
 - **IDs UUID** e `createdAt`/`updatedAt` em todo registro, prontos para sincronização futura.

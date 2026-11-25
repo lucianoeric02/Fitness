@@ -47,6 +47,10 @@ export interface AppSettings extends Timestamps {
   defaultRestSec: number;
   /** True once the starter exercise catalog was installed (never reinstalled after removal). */
   catalogSeeded?: boolean;
+  /** Default meals were created. */
+  mealsSeeded?: boolean;
+  /** Starter food catalog was installed (never reinstalled after removal). */
+  foodsSeeded?: boolean;
   /** Notification permission was requested for the rest timer. */
   restAlertsAsked?: boolean;
 }
@@ -72,46 +76,94 @@ export interface NutritionTarget extends BaseRecord, Nutrients {
 
 export interface FoodServing {
   id: string;
-  label: string; // e.g. "1 scoop", "1 ovo"
+  label: string; // e.g. "1 unidade", "1 scoop"
+  /** Weight (g) or volume (ml) of one serving, in the food's unit. */
   grams: number;
 }
 
-/** Food catalog item. Nutrients are per 100 g (or 100 ml for liquids). */
+export type FoodUnit = 'g' | 'ml';
+
+export type FoodCategory =
+  | 'grains'
+  | 'legumes'
+  | 'meat'
+  | 'fish'
+  | 'eggs_dairy'
+  | 'fruits'
+  | 'breads_pasta'
+  | 'tubers'
+  | 'vegetables'
+  | 'fats_nuts'
+  | 'supplements'
+  | 'other';
+
+/**
+ * Food catalog item. Nutrients are per 100 g (or per 100 ml when unit is
+ * 'ml'). The field keeps its v1 name `per100g` for compatibility.
+ */
 export interface Food extends BaseRecord {
   name: string;
+  category: FoodCategory;
+  unit: FoodUnit;
   brand?: string;
+  preparation?: string;
   per100g: Nutrients;
   servings: FoodServing[];
   favorite: boolean;
+  /** Starter catalog item (removable); false = created by the user. */
   isSeed: boolean;
   archivedAt?: string;
 }
 
+/**
+ * A meal category of the day (Café da manhã, Almoço…). Users can rename,
+ * reorder, hide and add their own. Targets are optional.
+ */
+export interface MealDefinition extends Timestamps {
+  id: string;
+  name: string;
+  sortOrder: number;
+  hidden: boolean;
+  target?: Partial<Pick<Nutrients, 'kcal' | 'proteinG' | 'carbsG' | 'fatG'>>;
+}
+
+/** Built-in meal ids (also the v1 slot values). */
 export type MealSlot = 'breakfast' | 'lunch' | 'afternoon' | 'pre_workout' | 'post_workout' | 'dinner' | 'supper';
 
 export interface MealTemplateItem {
   foodId: string;
+  /** Snapshot of the food name, so the template stays readable if the food is removed. */
+  foodName: string;
   grams: number;
+  servingLabel?: string;
 }
 
 /** A saved meal ("Café da manhã padrão") for one-tap re-logging. */
 export interface MealTemplate extends BaseRecord {
   name: string;
-  slot?: MealSlot;
+  /** Suggested meal id. */
+  slot?: string;
   items: MealTemplateItem[];
   archivedAt?: string;
 }
 
-/** A logged food. Nutrients are a snapshot computed at log time. */
+/**
+ * A logged food. Nutrients are a snapshot computed at log time from the
+ * food's values, so later catalog edits never rewrite past days.
+ */
 export interface FoodEntry extends BaseRecord {
   day: DayKey;
-  slot: MealSlot;
+  /** MealDefinition id. */
+  slot: string;
   foodId?: string;
   foodName: string;
+  /** Quantity in the food's unit (g or ml). */
   grams: number;
+  unit?: FoodUnit;
   servingLabel?: string;
   nutrients: Nutrients;
   mealTemplateId?: string;
+  note?: string;
   loggedAt: string;
 }
 
