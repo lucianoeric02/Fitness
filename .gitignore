@@ -1,0 +1,23 @@
+node_modules
+dist
+coverage
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Android build outputs
+android/app/build
+android/build
+android/.gradle
+android/local.properties
+android/app/release
+*.apk
+*.aab
+
+# Signing material: NEVER commit
+*.keystore
+*.jks
+signing/
+keystore.properties
