@@ -75,9 +75,14 @@ jobs:
       - name: Verify signature and name the APK
         if: env.HAS_KEYSTORE == 'true'
         run: |
+          set -o pipefail
           APK=android/app/build/outputs/apk/release/app-release.apk
+          test -f "$APK" || { echo "::error::Signed APK not found at $APK"; ls -la android/app/build/outputs/apk/release/ || true; exit 1; }
           APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
-          "$APKSIGNER" verify --print-certs "$APK" | grep -E "Signer #1 certificate (DN|SHA-256)"
+          # apksigner exits non-zero if the APK is unsigned or the signature is invalid.
+          # Certificate DN/digests are public information (not secrets).
+          "$APKSIGNER" verify --verbose --print-certs "$APK" > apksigner.txt 2>&1 || { cat apksigner.txt; echo "::error::APK signature verification failed"; exit 1; }
+          grep -iE "verified using|certificate (DN|SHA-256)" apksigner.txt || cat apksigner.txt
           VERSION=$(node -p "require('./package.json').version")
           mkdir -p out
           cp "$APK" "out/iron-track-${VERSION}-build${{ github.run_number }}.apk"
