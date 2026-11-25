@@ -13,7 +13,7 @@ export async function getProfile(): Promise<Profile | null> {
   return (await db.profile.get('me')) ?? null;
 }
 
-export type ProfileInput = Pick<Profile, 'name' | 'birthDate' | 'sex' | 'heightCm'>;
+export type ProfileInput = Pick<Profile, 'name' | 'birthDate' | 'sex' | 'heightCm' | 'trainingExperience' | 'activityLevel' | 'notes'>;
 
 export async function saveProfile(input: ProfileInput): Promise<Profile> {
   return db.transaction('rw', db.profile, async () => {
@@ -25,6 +25,9 @@ export async function saveProfile(input: ProfileInput): Promise<Profile> {
       birthDate: input.birthDate || undefined,
       sex: input.sex,
       heightCm: input.heightCm,
+      trainingExperience: input.trainingExperience,
+      activityLevel: input.activityLevel,
+      notes: input.notes?.trim() || undefined,
       onboardedAt: existing?.onboardedAt ?? now,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,

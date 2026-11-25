@@ -68,7 +68,31 @@ export class IronTrackDB extends Dexie {
       sessionExercises: 'id, sessionId, exerciseId, [sessionId+sortOrder]',
       sets: 'id, sessionId, sessionExerciseId',
     });
+
+    // v2: goal statuses/kinds revised (achieved → completed, archived → paused,
+    // lift → performance, custom → conditioning); measurements gain custom sites.
+    this.version(2)
+      .stores({ measurements: 'id, day, site, [site+day], measuredAt' })
+      .upgrade((tx) =>
+        tx
+          .table('goals')
+          .toCollection()
+          .modify((g) => {
+            Object.assign(g, migrateGoalV1(g));
+          }),
+      );
   }
+}
+
+/** Maps a v1 goal record to the v2 shape. Used by the DB upgrade and backup import. */
+export function migrateGoalV1(g: Record<string, unknown>): Record<string, unknown> {
+  const statusMap: Record<string, string> = { achieved: 'completed', archived: 'paused' };
+  const kindMap: Record<string, string> = { lift: 'performance', custom: 'conditioning' };
+  return {
+    ...g,
+    status: statusMap[g.status as string] ?? g.status,
+    kind: kindMap[g.kind as string] ?? g.kind,
+  };
 }
 
 export const db = new IronTrackDB();

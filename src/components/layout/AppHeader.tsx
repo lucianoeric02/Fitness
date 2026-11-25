@@ -27,7 +27,7 @@ export function AppHeader({
       <div className="flex min-h-touch items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-1">
           {back && (
-            <IconButton label="Voltar" className="-ml-3 text-ink" onClick={() => navigate(back)}>
+            <IconButton label="Voltar" className="-ml-3 shrink-0 text-ink" onClick={() => navigate(back)}>
               <ChevronLeft className="size-6" />
             </IconButton>
           )}

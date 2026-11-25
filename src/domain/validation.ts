@@ -34,6 +34,10 @@ export const RULES = {
   carbsG: { label: 'Carboidratos', min: 0, max: 1500 },
   fatG: { label: 'Gordura', min: 0, max: 500 },
   waterMl: { label: 'Água', min: 500, max: 10000, integer: true },
+  bodyFatPct: { label: 'Gordura corporal', min: 2, max: 70 },
+  muscleMassKg: { label: 'Massa muscular', min: 10, max: 150 },
+  measurementCm: { label: 'Medida', min: 5, max: 250 },
+  waterQuickMl: { label: 'Quantidade', min: 10, max: 3000, integer: true },
 } satisfies Record<string, NumberRule>;
 
 export function validateName(name: string): ValidationResult {
@@ -53,4 +57,36 @@ export function validateBirthDate(value: string | undefined, today: DayKey): Val
 
 export function hasErrors(errors: Record<string, ValidationResult | undefined>): boolean {
   return Object.values(errors).some(Boolean);
+}
+
+/** A record date: valid, not in the future, not absurdly old. */
+export function validateRecordDate(value: string, today: DayKey): ValidationResult {
+  if (!value) return 'Informe a data.';
+  if (!isDayKey(value)) return 'Data inválida.';
+  if (value > today) return 'A data não pode estar no futuro.';
+  if (value < '1990-01-01') return 'Data inválida.';
+  return null;
+}
+
+export function validateOptionalFutureDate(value: string, today: DayKey): ValidationResult {
+  if (!value) return null;
+  if (!isDayKey(value)) return 'Data inválida.';
+  if (value <= today) return 'A data-alvo deve estar no futuro.';
+  return null;
+}
+
+export function validateText(value: string, label: string, max: number, required = true): ValidationResult {
+  const t = value.trim();
+  if (required && !t) return `Informe ${label.toLowerCase()}.`;
+  if (t.length > max) return `Use no máximo ${max} caracteres.`;
+  return null;
+}
+
+/** Generic goal value: finite, non-negative, below a sanity ceiling. */
+export function validateGoalValue(value: number | null, label: string, required: boolean, unit: string): ValidationResult {
+  if (value === null) return required ? `Informe ${label.toLowerCase()}.` : null;
+  if (!Number.isFinite(value) || value < 0) return `${label} deve ser um número positivo.`;
+  if (unit === '%' && value > 100) return `${label} deve estar entre 0 e 100%.`;
+  if (value > 100000) return `${label} parece alto demais.`;
+  return null;
 }

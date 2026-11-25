@@ -45,7 +45,7 @@ describe('app navigation', () => {
     fireEvent.click(screen.getByRole('button', { name: /Começar/ }));
 
     expect(await screen.findByText(/Rafael/, { selector: 'span' })).toBeTruthy();
-    expect(await screen.findByText('Meta principal')).toBeTruthy();
+    expect(await screen.findByText('Esta semana')).toBeTruthy();
     const weights = await db.bodyWeights.toArray();
     expect(weights[0]?.weightKg).toBe(80.5);
   });
@@ -82,6 +82,13 @@ describe('app navigation', () => {
     ['/mais/hidratacao', 'Hidratação'],
     ['/mais/planejamento', 'Planejamento'],
     ['/mais/perfil', 'Perfil'],
+    ['/mais/perfil/editar', 'Editar perfil'],
+    ['/mais/perfil/peso', 'Pesagens'],
+    ['/mais/perfil/medidas', 'Medidas corporais'],
+    ['/mais/perfil/medidas/nova', 'Registrar medidas'],
+    ['/mais/perfil/composicao', 'Composição corporal'],
+    ['/mais/objetivos', 'Objetivos'],
+    ['/mais/objetivos/novo', 'Novo objetivo'],
     ['/mais/metas', 'Metas diárias'],
     ['/mais/configuracoes', 'Configurações'],
     ['/mais/dados', 'Dados e backup'],
@@ -118,7 +125,7 @@ describe('app navigation', () => {
 
     fireEvent.click(within(nav).getByText('Início'));
     fireEvent.click(await screen.findByRole('button', { name: 'Descartar' }));
-    expect(await screen.findByText('Meta principal')).toBeTruthy();
+    expect(await screen.findByText('Esta semana')).toBeTruthy();
   });
 
   it('hides the bottom navigation while typing', async () => {

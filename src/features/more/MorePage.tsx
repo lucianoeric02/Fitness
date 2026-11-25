@@ -1,4 +1,4 @@
-import { CalendarDays, Database, Droplets, Settings, Target, UserRound } from 'lucide-react';
+import { CalendarDays, Database, Droplets, Flag, Settings, Target, UserRound } from 'lucide-react';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { ListGroup, ListRow } from '@/components/ui/List';
@@ -16,7 +16,8 @@ export function MorePage() {
       <AppHeader title="Mais" description="Perfil, rotina, configurações e seus dados." />
       <PageContainer className="gap-5">
         <ListGroup title="Você">
-          <ListRow icon={<UserRound className="size-5" />} title="Perfil" subtitle={profile?.name ?? 'Nome, altura e meta de peso'} to="/mais/perfil" />
+          <ListRow icon={<UserRound className="size-5" />} title="Perfil" subtitle={profile?.name ? `${profile.name} · pesagens, medidas, composição` : 'Dados, pesagens e medidas'} to="/mais/perfil" />
+          <ListRow icon={<Flag className="size-5" />} title="Objetivos" subtitle="Peso, composição, medidas, desempenho" to="/mais/objetivos" />
           <ListRow
             icon={<Target className="size-5" />}
             title="Metas diárias"

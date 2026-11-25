@@ -6,7 +6,15 @@ import { HydrationPage } from '@/features/hydration/HydrationPage';
 import { PlanningPage } from '@/features/planning/PlanningPage';
 import { DataPage } from '@/features/more/DataPage';
 import { MorePage } from '@/features/more/MorePage';
-import { ProfilePage } from '@/features/more/ProfilePage';
+import { CompositionPage } from '@/features/body/CompositionPage';
+import { MeasurementFormPage } from '@/features/body/MeasurementFormPage';
+import { MeasurementSeriesPage } from '@/features/body/MeasurementSeriesPage';
+import { MeasurementsPage } from '@/features/body/MeasurementsPage';
+import { WeightHistoryPage } from '@/features/body/WeightHistoryPage';
+import { GoalFormPage } from '@/features/goals/GoalFormPage';
+import { GoalsPage } from '@/features/goals/GoalsPage';
+import { EditProfilePage } from '@/features/profile/EditProfilePage';
+import { ProfilePage } from '@/features/profile/ProfilePage';
 import { SettingsPage } from '@/features/more/SettingsPage';
 import { TargetsPage } from '@/features/more/TargetsPage';
 import { NutritionPage } from '@/features/nutrition/NutritionPage';
@@ -59,6 +67,15 @@ export const router = createHashRouter([
           { path: 'mais/hidratacao', element: <HydrationPage /> },
           { path: 'mais/planejamento', element: <PlanningPage /> },
           { path: 'mais/perfil', element: <ProfilePage /> },
+          { path: 'mais/perfil/editar', element: <EditProfilePage /> },
+          { path: 'mais/perfil/peso', element: <WeightHistoryPage /> },
+          { path: 'mais/perfil/composicao', element: <CompositionPage /> },
+          { path: 'mais/perfil/medidas', element: <MeasurementsPage /> },
+          { path: 'mais/perfil/medidas/nova', element: <MeasurementFormPage /> },
+          { path: 'mais/perfil/medidas/:key', element: <MeasurementSeriesPage /> },
+          { path: 'mais/objetivos', element: <GoalsPage /> },
+          { path: 'mais/objetivos/novo', element: <GoalFormPage /> },
+          { path: 'mais/objetivos/:id', element: <GoalFormPage /> },
           { path: 'mais/metas', element: <TargetsPage /> },
           { path: 'mais/configuracoes', element: <SettingsPage /> },
           { path: 'mais/dados', element: <DataPage /> },

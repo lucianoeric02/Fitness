@@ -172,3 +172,75 @@ export function Segmented<T extends string>({
     </div>
   );
 }
+
+/** Multi-line text (notes). */
+export function TextArea({
+  label,
+  hint,
+  error,
+  value,
+  onChange,
+  rows = 3,
+  maxLength,
+}: BaseFieldProps & { value: string; onChange: (v: string) => void; rows?: number; maxLength?: number }) {
+  const id = useId();
+  return (
+    <FieldShell id={id} label={label} hint={hint} error={error}>
+      <textarea
+        id={id}
+        rows={rows}
+        maxLength={maxLength}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={Boolean(error) || undefined}
+        className={cn(inputClass(error), 'h-auto py-3 leading-relaxed')}
+      />
+    </FieldShell>
+  );
+}
+
+/** Wrapping single-select chips, for short option lists that don't fit a segmented control. */
+export function ChipGroup<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  options: ReadonlyArray<{ value: T; label: string }>;
+  value: T | undefined;
+  onChange: (v: T) => void;
+  error?: string | null;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-caption font-medium text-muted">{label}</span>
+      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
+        {options.map((o) => {
+          const active = o.value === value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onChange(o.value)}
+              className={cn(
+                'pressable min-h-10 rounded-full border px-4 text-sm font-medium',
+                active ? 'border-accent/60 bg-accent/15 text-ink' : 'border-line bg-elevated text-muted active:bg-line',
+              )}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {error && (
+        <p role="alert" className="text-caption text-danger">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}

@@ -1,12 +1,42 @@
 import { useEffect, useRef, type RefObject } from 'react';
 
-let openOverlays = 0;
+/**
+ * Overlay stack shared by BottomSheet and Modal. Overlays can be stacked
+ * (e.g. a confirmation over an edit sheet); only the topmost one reacts to
+ * Escape and to the Android back gesture.
+ */
+interface Entry {
+  id: string;
+  close: () => void;
+}
+const stack: Entry[] = [];
+/** popstate events caused by our own history.back() calls, to ignore. */
+let selfPops = 0;
+let listening = false;
+
+function onPopState() {
+  if (selfPops > 0) {
+    selfPops -= 1;
+    return;
+  }
+  const top = stack.pop();
+  top?.close();
+}
+
+function onKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Escape') stack[stack.length - 1]?.close();
+}
+
+function ensureListeners() {
+  if (listening) return;
+  listening = true;
+  window.addEventListener('popstate', onPopState);
+  window.addEventListener('keydown', onKeyDown);
+}
 
 /**
- * Shared behaviour for modal overlays (BottomSheet, Modal):
- * - locks page scroll while open,
- * - closes on Escape,
- * - closes on the Android back gesture via a temporary history entry,
+ * - locks page scroll while any overlay is open,
+ * - closes the topmost overlay on Escape / back gesture (via a history entry),
  * - moves focus into the panel.
  */
 export function useOverlay(open: boolean, onClose: () => void, panelRef: RefObject<HTMLElement | null>, id: string) {
@@ -15,28 +45,26 @@ export function useOverlay(open: boolean, onClose: () => void, panelRef: RefObje
 
   useEffect(() => {
     if (!open) return;
-    openOverlays += 1;
+    ensureListeners();
+    const entry: Entry = { id, close: () => onCloseRef.current() };
+    stack.push(entry);
     document.body.style.overflow = 'hidden';
-
     window.history.pushState({ overlay: id }, '');
-    let closedByPop = false;
-    const onPop = () => {
-      closedByPop = true;
-      onCloseRef.current();
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCloseRef.current();
-    };
-    window.addEventListener('popstate', onPop);
-    window.addEventListener('keydown', onKey);
     panelRef.current?.focus();
 
     return () => {
-      openOverlays -= 1;
-      if (openOverlays === 0) document.body.style.overflow = '';
-      window.removeEventListener('popstate', onPop);
-      window.removeEventListener('keydown', onKey);
-      if (!closedByPop && window.history.state?.overlay === id) window.history.back();
+      const idx = stack.indexOf(entry);
+      if (idx !== -1) {
+        // Closed by the app (not by the back gesture): drop our history entry.
+        stack.splice(idx, 1);
+        // Every overlay pushed exactly one entry; while the current entry is an
+        // overlay entry (not a route the user navigated to), pop one.
+        if (window.history.state?.overlay) {
+          selfPops += 1;
+          window.history.back();
+        }
+      }
+      if (stack.length === 0) document.body.style.overflow = '';
     };
   }, [open, id, panelRef]);
 }

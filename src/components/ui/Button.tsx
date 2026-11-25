@@ -1,5 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { LoaderCircle } from 'lucide-react';
+import { Link } from 'react-router';
 import { cn } from '@/lib/cn';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -26,6 +27,36 @@ const sizes: Record<Size, string> = {
   md: 'h-12 gap-2 rounded-control px-5 text-body',
   lg: 'h-14 gap-2 rounded-control px-6 text-base',
 };
+
+export function buttonClass({ variant = 'primary', size = 'md', block }: { variant?: Variant; size?: Size; block?: boolean } = {}) {
+  return cn('pressable inline-flex items-center justify-center font-semibold tracking-tight', variants[variant], sizes[size], block && 'w-full');
+}
+
+/** Navigation styled as a button (a link must not wrap a <button>). */
+export function LinkButton({
+  to,
+  variant = 'primary',
+  size = 'md',
+  block,
+  icon,
+  className,
+  children,
+}: {
+  to: string;
+  variant?: Variant;
+  size?: Size;
+  block?: boolean;
+  icon?: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link to={to} className={cn(buttonClass({ variant, size, block }), className)}>
+      {icon}
+      {children}
+    </Link>
+  );
+}
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant = 'primary', size = 'md', loading, icon, block, className, children, disabled, type = 'button', ...rest },

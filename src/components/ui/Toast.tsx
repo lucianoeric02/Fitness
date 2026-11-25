@@ -4,16 +4,21 @@ import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 type ToastKind = 'success' | 'error' | 'info';
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
 interface ToastItem {
   id: number;
   kind: ToastKind;
   message: string;
+  action?: ToastAction;
 }
 
 interface ToastApi {
-  success: (message: string) => void;
+  success: (message: string, action?: ToastAction) => void;
   error: (message: string) => void;
-  info: (message: string) => void;
+  info: (message: string, action?: ToastAction) => void;
 }
 
 const ToastContext = createContext<ToastApi | null>(null);
@@ -22,17 +27,22 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const seq = useRef(0);
 
-  const push = useCallback((kind: ToastKind, message: string) => {
-    const id = ++seq.current;
-    setItems((prev) => [...prev.slice(-2), { id, kind, message }]);
-    window.setTimeout(() => setItems((prev) => prev.filter((t) => t.id !== id)), kind === 'error' ? 5000 : 2800);
-  }, []);
+  const dismiss = useCallback((id: number) => setItems((prev) => prev.filter((t) => t.id !== id)), []);
+  const push = useCallback(
+    (kind: ToastKind, message: string, action?: ToastAction) => {
+      const id = ++seq.current;
+      setItems((prev) => [...prev.slice(-2), { id, kind, message, action }]);
+      // Toasts with an action stay longer so there is time to tap it.
+      window.setTimeout(() => dismiss(id), kind === 'error' ? 5000 : action ? 5000 : 2800);
+    },
+    [dismiss],
+  );
 
   const api = useMemo<ToastApi>(
     () => ({
-      success: (m) => push('success', m),
+      success: (m, a) => push('success', m, a),
       error: (m) => push('error', m),
-      info: (m) => push('info', m),
+      info: (m, a) => push('info', m, a),
     }),
     [push],
   );
@@ -54,7 +64,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               {t.kind === 'success' && <CheckCircle2 className="size-5 shrink-0 text-accent" />}
               {t.kind === 'error' && <AlertCircle className="size-5 shrink-0 text-danger" />}
               {t.kind === 'info' && <Info className="size-5 shrink-0 text-water" />}
-              <span>{t.message}</span>
+              <span className="flex-1">{t.message}</span>
+              {t.action && (
+                <button
+                  type="button"
+                  className="pressable -my-1 -mr-2 min-h-touch rounded-xl px-3 text-sm font-semibold text-accent active:bg-line"
+                  onClick={() => {
+                    t.action!.onClick();
+                    dismiss(t.id);
+                  }}
+                >
+                  {t.action.label}
+                </button>
+              )}
             </div>
           ))}
         </div>,

@@ -1,4 +1,4 @@
-import { db, TABLE_NAMES, type TableName } from '@/data/db';
+import { db, migrateGoalV1, TABLE_NAMES, type TableName } from '@/data/db';
 import { nowIso } from '@/lib/dates';
 
 export const BACKUP_FORMAT = 'iron-track-backup';
@@ -74,7 +74,12 @@ export function parseBackup(text: string): BackupFile {
       }
     }
   }
-  return b as BackupFile;
+  const file = b as BackupFile;
+  // Older backups: bring records up to the current schema before import.
+  if (file.schemaVersion < 2 && file.tables.goals) {
+    file.tables.goals = file.tables.goals.map((g) => migrateGoalV1(g as Record<string, unknown>));
+  }
+  return file;
 }
 
 /** Replaces ALL local data with the backup contents, atomically. */

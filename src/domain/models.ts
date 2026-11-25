@@ -23,6 +23,8 @@ export interface BaseRecord extends Timestamps {
 // ---- Profile & settings ----------------------------------------------------
 
 export type Sex = 'male' | 'female';
+export type TrainingExperience = 'beginner' | 'intermediate' | 'advanced';
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'high' | 'very_high';
 
 export interface Profile extends Timestamps {
   id: 'me';
@@ -30,6 +32,9 @@ export interface Profile extends Timestamps {
   birthDate?: DayKey;
   sex?: Sex;
   heightCm?: number;
+  trainingExperience?: TrainingExperience;
+  activityLevel?: ActivityLevel;
+  notes?: string;
   onboardedAt: string;
 }
 
@@ -121,7 +126,9 @@ export interface BodyWeightEntry extends BaseRecord {
   note?: string;
 }
 
+/** Predefined body sites. Limbs are always recorded per side. */
 export type MeasurementSite =
+  | 'custom'
   | 'neck'
   | 'shoulders'
   | 'chest'
@@ -141,6 +148,8 @@ export interface MeasurementEntry extends BaseRecord {
   day: DayKey;
   measuredAt: string;
   site: MeasurementSite;
+  /** Required when site is 'custom' (e.g. "Ombro relaxado"). */
+  customName?: string;
   valueCm: number;
 }
 
@@ -155,21 +164,39 @@ export interface BodyCompositionEntry extends BaseRecord {
 
 // ---- Goals -----------------------------------------------------------------
 
-export type GoalKind = 'body_weight' | 'measurement' | 'body_fat' | 'lift' | 'custom';
-export type GoalStatus = 'active' | 'achieved' | 'archived';
+export type GoalKind =
+  | 'body_weight'
+  | 'body_fat'
+  | 'muscle_mass'
+  | 'measurement'
+  | 'performance'
+  | 'conditioning'
+  | 'consistency';
+export type GoalStatus = 'active' | 'paused' | 'completed';
 
 export interface Goal extends BaseRecord {
   kind: GoalKind;
   title: string;
   unit: string;
-  startValue: number;
+  /** Initial value. May be missing (progress is then not computed). */
+  startValue?: number;
   targetValue: number;
+  /**
+   * Manually maintained current value. Only used for kinds without a
+   * record source (performance, conditioning). Other kinds derive the
+   * current value from their records.
+   */
+  manualCurrentValue?: number;
+  /** Creation day of the goal. */
   startDate: DayKey;
   targetDate?: DayKey;
   isPrimary: boolean;
   status: GoalStatus;
-  /** Measurement site or exercise id, depending on kind. */
-  ref?: string;
+  completedAt?: string;
+  notes?: string;
+  /** Measurement goals: site key, plus customName for custom sites. */
+  ref?: MeasurementSite;
+  refName?: string;
 }
 
 // ---- Training --------------------------------------------------------------
