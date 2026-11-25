@@ -244,3 +244,41 @@ export function ChipGroup<T extends string>({
     </div>
   );
 }
+
+/** Wrapping multi-select chips. */
+export function MultiChipGroup<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: ReadonlyArray<{ value: T; label: string }>;
+  value: ReadonlyArray<T>;
+  onChange: (v: T[]) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-caption font-medium text-muted">{label}</span>
+      <div role="group" aria-label={label} className="flex flex-wrap gap-2">
+        {options.map((o) => {
+          const active = value.includes(o.value);
+          return (
+            <button
+              key={o.value}
+              type="button"
+              aria-pressed={active}
+              onClick={() => onChange(active ? value.filter((v) => v !== o.value) : [...value, o.value])}
+              className={cn(
+                'pressable min-h-10 rounded-full border px-4 text-sm font-medium',
+                active ? 'border-accent/60 bg-accent/15 text-ink' : 'border-line bg-elevated text-muted active:bg-line',
+              )}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

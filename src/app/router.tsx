@@ -20,6 +20,10 @@ import { TargetsPage } from '@/features/more/TargetsPage';
 import { NutritionPage } from '@/features/nutrition/NutritionPage';
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage';
 import { ProgressPage } from '@/features/progress/ProgressPage';
+import { ActiveSessionPage } from '@/features/workout/ActiveSessionPage';
+import { ExerciseDetailPage, ExerciseFormPage, ExerciseLibraryPage } from '@/features/workout/ExercisePages';
+import { HistoryPage, SessionDetailPage } from '@/features/workout/HistoryPages';
+import { NewRoutinePage, RoutineEditorPage } from '@/features/workout/RoutineEditorPage';
 import { WorkoutPage } from '@/features/workout/WorkoutPage';
 import { useProfile } from '@/hooks/data';
 
@@ -61,6 +65,15 @@ export const router = createHashRouter([
         children: [
           { index: true, element: <HomePage /> },
           { path: 'treino', element: <WorkoutPage /> },
+          { path: 'treino/sessao', element: <ActiveSessionPage /> },
+          { path: 'treino/rotinas/nova', element: <NewRoutinePage /> },
+          { path: 'treino/rotinas/:id', element: <RoutineEditorPage /> },
+          { path: 'treino/exercicios', element: <ExerciseLibraryPage /> },
+          { path: 'treino/exercicios/novo', element: <ExerciseFormPage /> },
+          { path: 'treino/exercicios/:id', element: <ExerciseDetailPage /> },
+          { path: 'treino/exercicios/:id/editar', element: <ExerciseFormPage /> },
+          { path: 'treino/historico', element: <HistoryPage /> },
+          { path: 'treino/historico/:id', element: <SessionDetailPage /> },
           { path: 'nutricao', element: <NutritionPage /> },
           { path: 'progresso', element: <ProgressPage /> },
           { path: 'mais', element: <MorePage /> },

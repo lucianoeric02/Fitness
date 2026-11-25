@@ -21,6 +21,7 @@ import {
 } from '@/data/backup';
 import { db, TABLE_NAMES } from '@/data/db';
 import { saveTextFile } from '@/services/fileExport';
+import { removeSeedExercises } from '@/data/repos/exercises';
 import { formatNumber } from '@/lib/numbers';
 
 export function DataPage() {
@@ -30,6 +31,8 @@ export function DataPage() {
   const [exporting, setExporting] = useState(false);
   const [pending, setPending] = useState<BackupFile | null>(null);
   const [confirmWipe, setConfirmWipe] = useState(false);
+  const [confirmSeed, setConfirmSeed] = useState(false);
+  const seedCount = useLiveQuery(async () => (await db.exercises.toArray()).filter((e) => e.isSeed && !e.archivedAt).length, []);
 
   const totalRecords = useLiveQuery(async () => {
     const counts = await Promise.all(TABLE_NAMES.map((t) => db.table(t).count()));
@@ -96,6 +99,18 @@ export function DataPage() {
           />
         </Card>
 
+        {(seedCount ?? 0) > 0 && (
+          <Card className="flex flex-col gap-3">
+            <SectionHeader title="Dados de exemplo" />
+            <p className="text-caption text-muted">
+              {seedCount} exercícios do catálogo inicial. Removê-los não afeta exercícios que você criou. Os que estão em rotinas ou no histórico são apenas arquivados.
+            </p>
+            <Button variant="secondary" block onClick={() => setConfirmSeed(true)}>
+              Remover catálogo inicial
+            </Button>
+          </Card>
+        )}
+
         <Card className="flex flex-col gap-3 border-danger/20">
           <SectionHeader title="Zona de risco" />
           <Button variant="danger" block icon={<Trash2 className="size-5" />} onClick={() => setConfirmWipe(true)}>
@@ -135,6 +150,18 @@ export function DataPage() {
         }}
       />
 
+      <ConfirmSheet
+        open={confirmSeed}
+        onClose={() => setConfirmSeed(false)}
+        title="Remover catálogo inicial?"
+        confirmLabel="Remover"
+        description="Os exercícios de exemplo saem da biblioteca. Treinos e rotinas que usam algum deles continuam intactos (esses ficam arquivados). O catálogo não é reinstalado automaticamente."
+        onConfirm={async () => {
+          const r = await removeSeedExercises();
+          setConfirmSeed(false);
+          toast.success(`${r.deleted} removidos${r.archived ? `, ${r.archived} arquivados (em uso)` : ''}.`);
+        }}
+      />
       <ConfirmSheet
         open={confirmWipe}
         onClose={() => setConfirmWipe(false)}

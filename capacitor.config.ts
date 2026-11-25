@@ -16,6 +16,10 @@ const config: CapacitorConfig = {
       initialViewportFitValueHint: 'cover',
       style: 'DARK',
     },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_iron',
+      iconColor: '#A3E635',
+    },
   },
 };
 

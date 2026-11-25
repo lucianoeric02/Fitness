@@ -45,6 +45,10 @@ export interface AppSettings extends Timestamps {
   /** Hour (0–5) at which a new day begins for logging purposes. */
   dayStartHour: number;
   defaultRestSec: number;
+  /** True once the starter exercise catalog was installed (never reinstalled after removal). */
+  catalogSeeded?: boolean;
+  /** Notification permission was requested for the rest timer. */
+  restAlertsAsked?: boolean;
 }
 
 // ---- Nutrition -------------------------------------------------------------
@@ -216,22 +220,39 @@ export type MuscleGroup =
   | 'full_body'
   | 'cardio';
 
-export type Equipment = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight' | 'kettlebell' | 'band' | 'other';
+export type Equipment = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight' | 'kettlebell' | 'band' | 'smith' | 'other';
+export type MovementType = 'compound' | 'isolation' | 'cardio';
 
 export interface Exercise extends BaseRecord {
   name: string;
   primaryMuscle: MuscleGroup;
   secondaryMuscles: MuscleGroup[];
   equipment: Equipment;
+  movementType: MovementType;
+  instructions?: string;
+  /** Optional local image (data URL, resized on import). */
+  imageDataUrl?: string;
+  defaultSets: number;
+  repMin: number;
+  repMax: number;
+  restSec: number;
   notes?: string;
+  /** Exercise ids suggested as substitutes. */
+  alternativeIds: string[];
   isSeed: boolean;
   archivedAt?: string;
 }
 
+/**
+ * A routine. Active routines form a rotation (A → B → C → A…) ordered by
+ * sortOrder; the next one is suggested after each completed session.
+ */
 export interface WorkoutTemplate extends BaseRecord {
   name: string;
+  description?: string;
   notes?: string;
   sortOrder: number;
+  active: boolean;
   archivedAt?: string;
 }
 
@@ -248,6 +269,15 @@ export interface TemplateExercise extends BaseRecord {
 
 export type SessionStatus = 'in_progress' | 'completed' | 'discarded';
 
+/** Rest timer state, timestamp-based so it survives backgrounding and restarts. */
+export interface RestTimerState {
+  durationSec: number;
+  /** ISO time the rest ends while running. */
+  endsAt?: string;
+  /** Remaining ms while paused. */
+  pausedRemainingMs?: number;
+}
+
 /** A performed workout. Template fields are copied, never referenced live. */
 export interface WorkoutSession extends BaseRecord {
   templateId?: string;
@@ -257,15 +287,29 @@ export interface WorkoutSession extends BaseRecord {
   endedAt?: string;
   status: SessionStatus;
   notes?: string;
+  /** Set while the session is paused. */
+  pausedAt?: string;
+  /** Accumulated paused time, excluded from duration. */
+  pausedMs?: number;
+  rest?: RestTimerState;
 }
 
 export interface SessionExercise extends BaseRecord {
   sessionId: string;
   exerciseId: string;
+  /** Snapshot of the name at the time of the session. */
   exerciseName: string;
+  primaryMuscle?: MuscleGroup;
   sortOrder: number;
+  targetSets?: number;
+  repMin?: number;
+  repMax?: number;
   restSec: number;
   notes?: string;
+  skipped?: boolean;
+  /** Set when this exercise replaced the planned one during the session. */
+  substitutedFromId?: string;
+  substitutedFromName?: string;
 }
 
 export type SetKind = 'warmup' | 'working' | 'drop' | 'failure';
@@ -279,5 +323,6 @@ export interface SetRecord extends BaseRecord {
   reps: number;
   /** Reps in reserve, optional. */
   rir?: number;
+  note?: string;
   completedAt?: string;
 }

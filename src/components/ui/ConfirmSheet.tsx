@@ -11,7 +11,9 @@ export function ConfirmSheet({
   confirmLabel,
   onConfirm,
   destructive = true,
+  cancelLabel = 'Cancelar',
 }: {
+  cancelLabel?: string;
   open: boolean;
   onClose: () => void;
   title: string;
@@ -29,7 +31,7 @@ export function ConfirmSheet({
       footer={
         <div className="grid grid-cols-2 gap-3">
           <Button variant="secondary" onClick={onClose} disabled={busy}>
-            Cancelar
+            {cancelLabel}
           </Button>
           <Button
             variant={destructive ? 'danger' : 'primary'}

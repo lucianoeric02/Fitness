@@ -40,12 +40,12 @@ describe('dashboard', () => {
   it('shows real values only and setup-oriented empty states', async () => {
     await onboard();
     renderApp();
-    expect(await screen.findByText('Nenhum treino agendado')).toBeTruthy();
+    expect(await screen.findByText('Nenhuma rotina criada')).toBeTruthy();
     expect(screen.getByText('Adicione sua primeira refeição')).toBeTruthy();
     expect(screen.getByText('3.400')).toBeTruthy(); // remaining = target − 0 consumed
     expect(screen.getByText(/Primeira pesagem/)).toBeTruthy();
     expect(screen.getByText(/Consistência alimentar aparece após registros/)).toBeTruthy();
-    expect(screen.getByText('Planejamento não configurado')).toBeTruthy();
+    expect(screen.getByText('Defina em Objetivos → Frequência de treino')).toBeTruthy();
   });
 
   it('shows a setup state when there is no weight or goal', async () => {
@@ -94,9 +94,9 @@ describe('dashboard', () => {
     await db.workoutSessions.add({ ...base, id: newId(), name: 'Push A', status: 'in_progress' });
     renderApp();
     expect(await screen.findByText('Push A')).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Retomar treino' }).getAttribute('href')).toBe('#/treino');
+    expect(screen.getByRole('link', { name: 'Retomar treino' }).getAttribute('href')).toBe('#/treino/sessao');
     await db.workoutSessions.toCollection().modify({ status: 'completed', endedAt: now });
-    expect(await screen.findByRole('link', { name: 'Ver treino' })).toBeTruthy();
+    expect((await screen.findByRole('link', { name: 'Ver treino' })).getAttribute('href')).toMatch(/^#\/treino\/historico\//);
   });
 
   it('cards and quick actions go to the right places', async () => {

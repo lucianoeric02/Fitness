@@ -56,6 +56,16 @@ Componentes (`src/components`): `AppHeader`, `BottomNavigation`, `PageContainer`
 
 Proteções de navegação: a barra inferior se esconde enquanto o teclado está aberto, e formulários com alterações pedem confirmação antes de sair (`useUnsavedChangesGuard`).
 
+## Treino
+
+- **Rotinas em sequência rotativa** (A → B → C → A…): o próximo treino é a rotina ativa seguinte à do último treino concluído.
+- **Sessão só começa com toque explícito** em "Iniciar treino". As séries vêm pré-preenchidas com o desempenho anterior; nada aumenta carga sozinho.
+- **Timer de descanso por timestamps** (`src/domain/calc/restTimer.ts`): o restante é sempre `fim − agora`, então continua correto com tela apagada, app em segundo plano ou reiniciado. No APK, uma notificação local é agendada para o fim do descanso.
+- **Substituições** valem só para a sessão; atualizar a rotina é uma escolha explícita. Ficam registradas no histórico.
+- **Histórico protegido**: sessões copiam nomes e prescrições; editar/excluir rotinas ou exercícios não altera treinos concluídos.
+- **Recordes**: maior carga, melhor 1RM estimado (Epley) e mais repetições, comparados apenas com sessões anteriores.
+- Catálogo inicial com ~80 exercícios (seed removível em Dados e backup).
+
 ## Princípios de dados
 
 - **IDs UUID** e `createdAt`/`updatedAt` em todo registro, prontos para sincronização futura.

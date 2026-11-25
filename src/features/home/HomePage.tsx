@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { CalendarCheck, ChevronRight, Droplets, Dumbbell, Flag, Plus, Scale, Undo2, UtensilsCrossed } from 'lucide-react';
+import { CalendarCheck, ChevronRight, Droplets, Dumbbell, Flag, Play, Plus, Scale, Undo2, UtensilsCrossed } from 'lucide-react';
 import { Link } from 'react-router';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -12,7 +12,12 @@ import { LoadingScreen } from '@/components/ui/States';
 import { db } from '@/data/db';
 import { evaluateGoal } from '@/domain/calc/goals';
 import { dailyNutritionProgress, metricProgress, type MetricProgress } from '@/domain/calc/nutrition';
-import { sessionDurationMin } from '@/domain/calc/workout';
+import { activeDurationMs } from '@/domain/calc/workout';
+import { MUSCLE_LABELS } from '@/domain/exerciseCatalog';
+import type { MuscleGroup } from '@/domain/models';
+import { useStartWorkout } from '@/features/workout/useStartWorkout';
+import { routineDetails } from '@/features/workout/WorkoutPage';
+import { useRoutines, type TemplateSummary } from '@/hooks/workout';
 import { dailyWeights } from '@/domain/calc/weight';
 import type { WeekSummary } from '@/domain/calc/weekly';
 import { WeightSheet } from '@/features/body/WeightSheet';
@@ -34,30 +39,13 @@ import { cn } from '@/lib/cn';
 import { formatLongDay, formatRelativeDay, greetingFor, type DayKey } from '@/lib/dates';
 import { formatNumber, formatSigned, formatVolumeMl } from '@/lib/numbers';
 
-const MUSCLE_LABELS: Record<string, string> = {
-  chest: 'Peito',
-  back: 'Costas',
-  shoulders: 'Ombros',
-  biceps: 'Bíceps',
-  triceps: 'Tríceps',
-  forearms: 'Antebraços',
-  quads: 'Quadríceps',
-  hamstrings: 'Posteriores',
-  glutes: 'Glúteos',
-  calves: 'Panturrilhas',
-  abs: 'Abdômen',
-  full_body: 'Corpo todo',
-  cardio: 'Cardio',
-};
 
 /** Today's session (active first, then the latest completed) with its exercises. */
 function useTodayWorkout(today: DayKey) {
   return useLiveQuery(async () => {
-    const sessions = await db.workoutSessions.where('day').equals(today).toArray();
-    const session =
-      sessions.find((s) => s.status === 'in_progress') ??
-      sessions.filter((s) => s.status === 'completed').sort((a, b) => (a.startedAt < b.startedAt ? 1 : -1))[0] ??
-      null;
+    const active = await db.workoutSessions.where('status').equals('in_progress').first();
+    const todays = await db.workoutSessions.where('day').equals(today).toArray();
+    const session = active ?? todays.filter((s) => s.status === 'completed').sort((a, b) => (a.startedAt < b.startedAt ? 1 : -1))[0] ?? null;
     if (!session) return { session: null, exerciseCount: 0, muscles: [] as string[] };
     const items = await db.sessionExercises.where('sessionId').equals(session.id).toArray();
     const exercises = await db.exercises.bulkGet(items.map((i) => i.exerciseId));
@@ -76,10 +64,11 @@ export function HomePage() {
   const goals = useGoalViews(today);
   const week = useWeekSummary(today);
   const workout = useTodayWorkout(today);
+  const routines = useRoutines();
   const [weightOpen, setWeightOpen] = useState(false);
   const [waterOpen, setWaterOpen] = useState(false);
 
-  if ([profile, target, nutrition, water, weights, goals, week, workout].some((v) => v === undefined)) {
+  if ([profile, target, nutrition, water, weights, goals, week, workout, routines].some((v) => v === undefined)) {
     return <LoadingScreen />;
   }
 
@@ -108,7 +97,7 @@ export function HomePage() {
       />
 
       <PageContainer>
-        <WorkoutTodayCard data={workout!} />
+        <WorkoutTodayCard data={workout!} next={routines!.next} hasRoutines={routines!.summaries.length > 0} />
         {progress && (
           <>
             <CaloriesCard kcal={progress.kcal} hasEntries={(nutrition?.entries ?? 0) > 0} />
@@ -118,7 +107,7 @@ export function HomePage() {
         {target && <HydrationCard water={metricProgress(water!.totalMl, target.waterMl)} last={water!.last} />}
         <WeightCard weights={weights!} goals={goals!} today={today} onLog={() => setWeightOpen(true)} />
         <GoalsCard goals={goals!} />
-        <WeekCard week={week!} />
+        <WeekCard week={week!} frequencyTarget={goals!.find((g) => g.goal.kind === 'consistency' && g.goal.status === 'active')?.goal.targetValue ?? null} />
         <QuickActions onWeight={() => setWeightOpen(true)} onWater={() => setWaterOpen(true)} />
       </PageContainer>
 
@@ -138,14 +127,15 @@ function HeaderLink({ to, children }: { to: string; children: ReactNode }) {
   );
 }
 
-function WorkoutTodayCard({ data }: { data: NonNullable<ReturnType<typeof useTodayWorkout>> }) {
+function WorkoutTodayCard({ data, next, hasRoutines }: { data: NonNullable<ReturnType<typeof useTodayWorkout>>; next: TemplateSummary | null; hasRoutines: boolean }) {
   const { session, exerciseCount, muscles } = data;
+  const { start, starting } = useStartWorkout();
   const active = session?.status === 'in_progress';
   const details = session
     ? [
-        muscles.map((m) => MUSCLE_LABELS[m] ?? m).join(', '),
+        muscles.map((m) => MUSCLE_LABELS[m as MuscleGroup] ?? m).join(', '),
         exerciseCount ? `${exerciseCount} exercício${exerciseCount > 1 ? 's' : ''}` : '',
-        `${sessionDurationMin(session.startedAt, session.endedAt)} min`,
+        `${Math.round(activeDurationMs(session) / 60000)} min`,
       ].filter(Boolean)
     : [];
 
@@ -155,27 +145,40 @@ function WorkoutTodayCard({ data }: { data: NonNullable<ReturnType<typeof useTod
         icon={<Dumbbell className="size-4 text-accent" />}
         title="Treino de hoje"
         action={
-          session && (
-            <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', active ? 'bg-accent/15 text-accent' : 'bg-elevated text-muted')}>
-              {active ? 'Em andamento' : 'Concluído'}
-            </span>
-          )
+          <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', active ? 'bg-accent/15 text-accent' : 'bg-elevated text-muted')}>
+            {active ? 'Em andamento' : session ? 'Concluído' : next ? 'Planejado' : 'Sem rotina'}
+          </span>
         }
       />
       {session ? (
         <>
           <p className="text-lg font-semibold tracking-tight">{session.name}</p>
           {details.length > 0 && <p className="mt-0.5 text-caption text-muted">{details.join(' · ')}</p>}
-          <LinkButton to="/treino" block variant={active ? 'primary' : 'secondary'} className="mt-4">
+          <LinkButton to={active ? '/treino/sessao' : `/treino/historico/${session.id}`} block variant={active ? 'primary' : 'secondary'} className="mt-4">
             {active ? 'Retomar treino' : 'Ver treino'}
           </LinkButton>
         </>
+      ) : next ? (
+        <>
+          <p className="text-caption text-muted">Próximo na sequência</p>
+          <p className="text-lg font-semibold tracking-tight">{next.template.name}</p>
+          <p className="mt-0.5 text-caption text-muted">{routineDetails(next)}</p>
+          {next.items.length > 0 ? (
+            <Button block className="mt-4" loading={starting} icon={<Play className="size-5" />} onClick={() => void start(next.template.id)}>
+              Iniciar treino
+            </Button>
+          ) : (
+            <LinkButton to={`/treino/rotinas/${next.template.id}`} block variant="secondary" className="mt-4">
+              Adicionar exercícios
+            </LinkButton>
+          )}
+        </>
       ) : (
         <>
-          <p className="text-body font-semibold">Nenhum treino agendado</p>
-          <p className="mt-0.5 text-caption text-muted">Crie uma rotina e atribua aos dias da semana para ver o treino do dia aqui.</p>
-          <LinkButton to="/treino" block variant="secondary" className="mt-4">
-            Criar rotina
+          <p className="text-body font-semibold">{hasRoutines ? 'Nenhuma rotina ativa' : 'Nenhuma rotina criada'}</p>
+          <p className="mt-0.5 text-caption text-muted">Crie suas rotinas (ex.: A, B, C). Elas seguem em sequência e o próximo treino aparece aqui.</p>
+          <LinkButton to={hasRoutines ? '/treino' : '/treino/rotinas/nova'} block variant="secondary" className="mt-4">
+            {hasRoutines ? 'Ver rotinas' : 'Criar rotina'}
           </LinkButton>
         </>
       )}
@@ -371,7 +374,7 @@ function GoalsCard({ goals }: { goals: GoalView[] }) {
   );
 }
 
-function WeekCard({ week }: { week: WeekSummary }) {
+function WeekCard({ week, frequencyTarget }: { week: WeekSummary; frequencyTarget: number | null }) {
   return (
     <Card>
       <SectionHeader icon={<CalendarCheck className="size-4 text-accent" />} title="Esta semana" />
@@ -382,9 +385,9 @@ function WeekCard({ week }: { week: WeekSummary }) {
           note={week.workoutsCompleted ? `${week.trainingDays} dia${week.trainingDays > 1 ? 's' : ''} de treino` : 'Nenhum ainda'}
         />
         <WeekStat
-          label="Treinos planejados"
-          value={week.workoutsPlanned === null ? '—' : String(week.workoutsPlanned)}
-          note={week.workoutsPlanned === null ? 'Planejamento não configurado' : undefined}
+          label="Meta da semana"
+          value={frequencyTarget === null ? '—' : String(frequencyTarget)}
+          note={frequencyTarget === null ? 'Defina em Objetivos → Frequência de treino' : `${Math.max(0, frequencyTarget - week.workoutsCompleted)} restante${frequencyTarget - week.workoutsCompleted === 1 ? '' : 's'}`}
         />
       </div>
       <p className="mt-3 border-t border-line/60 pt-3 text-caption text-muted">

@@ -9,10 +9,10 @@ export function PlanningPage() {
       description="A semana de treinos e os lembretes que mantêm a rotina."
       empty={{
         icon: <CalendarDays className="size-6" />,
-        title: 'Nenhuma semana planejada',
-        description: 'O planejamento usa as rotinas do módulo de Treino e chega depois dele.',
+        title: 'Seus treinos seguem em sequência',
+        description: 'A ordem das rotinas (A → B → C → A…) é definida em Treino. Lembretes chegam em uma próxima atualização.',
       }}
-      upcoming={['Rotina atribuída a cada dia da semana', 'Dias de descanso', 'Lembretes de treino, refeições e pesagem']}
+      upcoming={['Lembretes de treino', 'Lembretes de refeições e água', 'Lembrete de pesagem']}
     />
   );
 }

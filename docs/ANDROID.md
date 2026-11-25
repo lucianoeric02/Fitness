@@ -36,6 +36,10 @@ Cada build também fica disponível como artefato do workflow por 30 dias.
 3. Se o HyperOS mostrar o aviso de segurança, toque em **"Instalar mesmo assim"**.
 4. Para atualizar: baixe o novo APK e instale por cima. **Os dados são mantidos.**
 
+### Timer de descanso
+
+Na primeira vez que você inicia um treino, o app pede permissão de **notificações**: permita para receber o aviso de fim do descanso com a tela bloqueada. O app usa alarme exato local (sem internet).
+
 ### Recomendado no HyperOS
 
 - **Configurações → Apps → Iron Track → Economia de bateria → Sem restrições** (garante timer de descanso e lembretes nas próximas fases).

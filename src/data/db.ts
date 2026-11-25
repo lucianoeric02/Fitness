@@ -81,6 +81,34 @@ export class IronTrackDB extends Dexie {
             Object.assign(g, migrateGoalV1(g));
           }),
       );
+
+    // v3: workout system. Routines gain an active flag (rotation); exercises
+    // gain prescription defaults; sets index by completion for history.
+    this.version(3)
+      .stores({
+        workoutSessions: 'id, day, status, templateId, startedAt, endedAt',
+        sets: 'id, sessionId, sessionExerciseId, completedAt',
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table('workoutTemplates')
+          .toCollection()
+          .modify((t) => {
+            if (t.active === undefined) t.active = !t.archivedAt;
+          });
+        await tx
+          .table('exercises')
+          .toCollection()
+          .modify((e) => {
+            e.movementType ??= 'compound';
+            e.defaultSets ??= 3;
+            e.repMin ??= 8;
+            e.repMax ??= 12;
+            e.restSec ??= 90;
+            e.alternativeIds ??= [];
+            e.secondaryMuscles ??= [];
+          });
+      });
   }
 }
 
