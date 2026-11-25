@@ -11,6 +11,16 @@ export class InvalidQuantityError extends Error {
   }
 }
 
+/**
+ * Strictly increasing log timestamps, so entries added in the same
+ * millisecond (e.g. applying a template) keep their insertion order.
+ */
+let lastLogMs = 0;
+function nextLogIso(): string {
+  lastLogMs = Math.max(Date.now(), lastLogMs + 1);
+  return new Date(lastLogMs).toISOString();
+}
+
 function assertQty(qty: number) {
   if (!Number.isFinite(qty) || qty <= 0 || qty > 5000) throw new InvalidQuantityError();
 }
@@ -18,7 +28,7 @@ function assertQty(qty: number) {
 /** Logs a food: nutrients are computed proportionally and stored as a snapshot. */
 export async function addFoodEntry(input: { day: DayKey; slot: string; food: Food; quantity: number; servingLabel?: string; note?: string; mealTemplateId?: string }): Promise<FoodEntry> {
   assertQty(input.quantity);
-  const now = nowIso();
+  const now = nextLogIso();
   const entry: FoodEntry = {
     id: newId(),
     day: input.day,
@@ -71,7 +81,7 @@ export async function restoreFoodEntry(entry: FoodEntry): Promise<void> {
 export async function duplicateFoodEntry(id: string, target?: { day?: DayKey; slot?: string }): Promise<FoodEntry> {
   const e = await db.foodEntries.get(id);
   if (!e) throw new Error('Registro não encontrado.');
-  const now = nowIso();
+  const now = nextLogIso();
   const copy: FoodEntry = { ...e, id: newId(), day: target?.day ?? e.day, slot: target?.slot ?? e.slot, loggedAt: now, createdAt: now, updatedAt: now };
   await db.foodEntries.add(copy);
   return copy;
