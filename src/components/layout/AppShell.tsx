@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { useEditingFocus } from '@/hooks/useEditingFocus';
+import { ReminderSync } from '@/features/planning/ReminderSync';
 import { RestTimerBar } from '@/features/workout/RestTimerBar';
 import { BottomNavigation } from './BottomNavigation';
 
@@ -21,6 +22,7 @@ export function AppShell() {
           <Outlet />
         </div>
       </main>
+      <ReminderSync />
       <RestTimerBar hidden={editing} />
       <BottomNavigation hidden={editing} />
     </div>

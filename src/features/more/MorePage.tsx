@@ -28,7 +28,7 @@ export function MorePage() {
 
         <ListGroup title="Rotina">
           <ListRow icon={<Droplets className="size-5" />} title="Hidratação" subtitle="Água do dia e meta" to="/mais/hidratacao" />
-          <ListRow icon={<CalendarDays className="size-5" />} title="Planejamento" subtitle="Semana de treinos e lembretes" to="/mais/planejamento" />
+          <ListRow icon={<CalendarDays className="size-5" />} title="Planejamento" subtitle="Dias de treino, calendário e lembretes" to="/mais/planejamento" />
         </ListGroup>
 
         <ListGroup title="App">

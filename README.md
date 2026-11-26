@@ -94,6 +94,14 @@ Gráficos SVG próprios (sem bibliotecas externas). Pesagens são pontos; nada �
 
 **Fotos de progresso** ficam apenas no IndexedDB do aparelho (redimensionadas localmente), nunca são enviadas a serviços externos e **não entram no backup JSON**.
 
+## Planejamento e lembretes
+
+- **Semana padrão**: dias de treino e de descanso. Nos dias de treino, o calendário projeta a sequência rotativa (A → B → C); o plano orienta, não obriga (treinos em outros dias contam como "fora do plano").
+- **Calendário** semanal e mensal, detalhe do dia, marcar descanso/treino, mover treino, notas por dia.
+- **Lembretes locais** (água com intervalo, treino só nos dias do plano, pesagem, refeições, revisão semanal, personalizados): título, tipo, horário, dias, ativo/inativo. Notificações semanais repetidas via `@capacitor/local-notifications`; sem servidor ou push pago. Tocar na notificação abre a tela relacionada.
+- **Permissão** pedida só ao ativar um lembrete, depois de uma explicação; nunca repetida se negada (o app mostra como ativar nas configurações do Android).
+- **Revisão semanal**: planejado × realizado, peso, nutrição (≥ 3 dias), hidratação, objetivos e recordes.
+
 ## Princípios de dados
 
 - **IDs UUID** e `createdAt`/`updatedAt` em todo registro, prontos para sincronização futura.

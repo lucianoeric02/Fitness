@@ -16,6 +16,8 @@ import { addDays, formatShortDay, startOfWeek, type DayKey } from '@/lib/dates';
 import { formatNumber, formatSigned, formatVolumeMl } from '@/lib/numbers';
 import { formatGoalValue } from '@/features/goals/GoalProgress';
 import { recordsTimeline, useTrainingData } from './TrainingTab';
+import { weekPlanStats } from '@/domain/calc/planning';
+import { usePlan } from '@/hooks/planning';
 
 /** Factual weekly summary. Only states what the records support. */
 export function WeekReport() {
@@ -27,6 +29,7 @@ export function WeekReport() {
   const weekStart: DayKey | null = settings ? addDays(startOfWeek(today, settings.weekStartsOn), -7 * offset) : null;
   const weekEnd = weekStart ? addDays(weekStart, 6) : null;
   const until = weekEnd && weekEnd > today ? today : weekEnd;
+  const plan = usePlan(weekStart ?? today, weekEnd ?? today, today);
   const data = useLiveQuery(async () => {
     if (!weekStart || !until) return null;
     const [weights, food, targets, water] = await Promise.all([
@@ -37,7 +40,7 @@ export function WeekReport() {
     ]);
     return { weights, food, targets, water };
   }, [weekStart, until]);
-  if (!settings || !training || !goals || data === undefined || !data || !weekStart || !weekEnd || !until) return <LoadingScreen />;
+  if (!settings || !training || !goals || !plan || data === undefined || !data || !weekStart || !weekEnd || !until) return <LoadingScreen />;
 
   const w = dailyWeights(data.weights);
   const inWeek = w.filter((x) => x.day >= weekStart);
@@ -86,6 +89,19 @@ export function WeekReport() {
       </Section>
 
       <Section title="Treino">
+        {plan.trainingDays !== undefined ? (
+          (() => {
+            const ps = weekPlanStats(plan.days, today);
+            return (
+              <Line>
+                Planejados: {ps.plannedTotal} dia{ps.plannedTotal === 1 ? '' : 's'} de treino na semana
+                {offset === 0 && ` (${ps.plannedSoFar} até hoje)`}. Feitos em {ps.plannedDaysDone} de {ps.plannedSoFar} dias planejados{offset === 0 ? ' até agora' : ''}.
+              </Line>
+            );
+          })()
+        ) : (
+          <Line>Sem plano semanal configurado (Mais → Planejamento), então não há comparação planejado × realizado.</Line>
+        )}
         <Line>
           {t.sessions} treino{t.sessions === 1 ? '' : 's'} concluído{t.sessions === 1 ? '' : 's'} em {t.trainingDays} dia{t.trainingDays === 1 ? '' : 's'}
           {t.sessions > 0 && <>; {t.sets} séries válidas; volume {formatNumber(t.volumeKg)} kg</>}.

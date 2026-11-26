@@ -51,6 +51,14 @@ export interface AppSettings extends Timestamps {
   mealsSeeded?: boolean;
   /** Starter food catalog was installed (never reinstalled after removal). */
   foodsSeeded?: boolean;
+  /**
+   * Weekly training pattern: weekdays (0 = Sunday … 6 = Saturday) planned as
+   * training days. Undefined = no plan configured. Routines on those days
+   * follow the rotation; the plan never blocks training on other days.
+   */
+  trainingDays?: number[];
+  /** Default reminders were created. */
+  remindersSeeded?: boolean;
   /** Notification permission was requested for the rest timer. */
   restAlertsAsked?: boolean;
 }
@@ -239,6 +247,33 @@ export interface ProgressPhoto extends BaseRecord {
   data: ArrayBuffer;
   width: number;
   height: number;
+}
+
+// ---- Planning & reminders ---------------------------------------------------
+
+/** Per-day override of the weekly pattern (rescheduling) and/or a note. Keyed by day. */
+export interface DayPlan extends Timestamps {
+  id: DayKey;
+  day: DayKey;
+  kind?: 'training' | 'rest';
+  note?: string;
+}
+
+export type ReminderType = 'water' | 'workout' | 'weigh_in' | 'nutrition' | 'weekly_review' | 'custom';
+
+export interface Reminder extends BaseRecord {
+  type: ReminderType;
+  title: string;
+  /** "HH:MM", local time. For water with an interval: first reminder of the day. */
+  time: string;
+  /** Weekdays 0–6 (0 = Sunday). */
+  days: number[];
+  enabled: boolean;
+  /** Water: repeat every N minutes until `endTime`. */
+  intervalMin?: number;
+  endTime?: string;
+  /** Workout: only on planned training days (from the weekly pattern). */
+  trainingDaysOnly?: boolean;
 }
 
 // ---- Goals -----------------------------------------------------------------

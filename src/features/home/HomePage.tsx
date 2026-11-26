@@ -35,8 +35,11 @@ import {
   type GoalView,
 } from '@/hooks/data';
 import { useToday } from '@/hooks/useToday';
+import { usePlan } from '@/hooks/planning';
+import { useSettings } from '@/hooks/data';
+import { weekPlanStats, type PlannedKind, type WeekPlanStats } from '@/domain/calc/planning';
 import { cn } from '@/lib/cn';
-import { formatLongDay, formatRelativeDay, greetingFor, type DayKey } from '@/lib/dates';
+import { addDays, formatLongDay, formatRelativeDay, greetingFor, startOfWeek, type DayKey } from '@/lib/dates';
 import { formatNumber, formatSigned, formatVolumeMl } from '@/lib/numbers';
 
 
@@ -65,10 +68,12 @@ export function HomePage() {
   const week = useWeekSummary(today);
   const workout = useTodayWorkout(today);
   const routines = useRoutines();
+  const settingsForPlan = useSettings();
+  const plan = usePlan(startOfWeek(today, settingsForPlan?.weekStartsOn ?? 1), addDays(startOfWeek(today, settingsForPlan?.weekStartsOn ?? 1), 6), today);
   const [weightOpen, setWeightOpen] = useState(false);
   const [waterOpen, setWaterOpen] = useState(false);
 
-  if ([profile, target, nutrition, water, weights, goals, week, workout, routines].some((v) => v === undefined)) {
+  if ([profile, target, nutrition, water, weights, goals, week, workout, routines, plan].some((v) => v === undefined)) {
     return <LoadingScreen />;
   }
 
@@ -97,7 +102,7 @@ export function HomePage() {
       />
 
       <PageContainer>
-        <WorkoutTodayCard data={workout!} next={routines!.next} hasRoutines={routines!.summaries.length > 0} />
+        <WorkoutTodayCard data={workout!} next={routines!.next} hasRoutines={routines!.summaries.length > 0} todayPlan={plan!.days.find((d) => d.day === today)?.planned ?? 'unplanned'} />
         {progress && (
           <>
             <CaloriesCard kcal={progress.kcal} hasEntries={(nutrition?.entries ?? 0) > 0} />
@@ -107,7 +112,7 @@ export function HomePage() {
         {target && <HydrationCard water={metricProgress(water!.totalMl, target.waterMl)} last={water!.last} />}
         <WeightCard weights={weights!} goals={goals!} today={today} onLog={() => setWeightOpen(true)} />
         <GoalsCard goals={goals!} />
-        <WeekCard week={week!} frequencyTarget={goals!.find((g) => g.goal.kind === 'consistency' && g.goal.status === 'active')?.goal.targetValue ?? null} />
+        <WeekCard week={week!} planStats={plan!.trainingDays !== undefined ? weekPlanStats(plan!.days, today) : null} frequencyTarget={goals!.find((g) => g.goal.kind === 'consistency' && g.goal.status === 'active')?.goal.targetValue ?? null} />
         <QuickActions onWeight={() => setWeightOpen(true)} onWater={() => setWaterOpen(true)} />
       </PageContainer>
 
@@ -127,7 +132,7 @@ function HeaderLink({ to, children }: { to: string; children: ReactNode }) {
   );
 }
 
-function WorkoutTodayCard({ data, next, hasRoutines }: { data: NonNullable<ReturnType<typeof useTodayWorkout>>; next: TemplateSummary | null; hasRoutines: boolean }) {
+function WorkoutTodayCard({ data, next, hasRoutines, todayPlan }: { data: NonNullable<ReturnType<typeof useTodayWorkout>>; next: TemplateSummary | null; hasRoutines: boolean; todayPlan: PlannedKind }) {
   const { session, exerciseCount, muscles } = data;
   const { start, starting } = useStartWorkout();
   const active = session?.status === 'in_progress';
@@ -146,7 +151,7 @@ function WorkoutTodayCard({ data, next, hasRoutines }: { data: NonNullable<Retur
         title="Treino de hoje"
         action={
           <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', active ? 'bg-accent/15 text-accent' : 'bg-elevated text-muted')}>
-            {active ? 'Em andamento' : session ? 'Concluído' : next ? 'Planejado' : 'Sem rotina'}
+            {active ? 'Em andamento' : session ? 'Concluído' : todayPlan === 'rest' ? 'Descanso' : next ? (todayPlan === 'training' ? 'Planejado' : 'Próximo') : 'Sem rotina'}
           </span>
         }
       />
@@ -158,9 +163,21 @@ function WorkoutTodayCard({ data, next, hasRoutines }: { data: NonNullable<Retur
             {active ? 'Retomar treino' : 'Ver treino'}
           </LinkButton>
         </>
+      ) : todayPlan === 'rest' ? (
+        <>
+          <p className="text-body font-semibold">Dia de descanso</p>
+          <p className="mt-0.5 text-caption text-muted">
+            {next ? `Próximo treino na sequência: ${next.template.name}.` : 'Seu plano marca descanso hoje.'} O plano orienta, não obriga.
+          </p>
+          {next && next.items.length > 0 && (
+            <Button block variant="secondary" className="mt-4" loading={starting} onClick={() => void start(next.template.id)}>
+              Treinar mesmo assim
+            </Button>
+          )}
+        </>
       ) : next ? (
         <>
-          <p className="text-caption text-muted">Próximo na sequência</p>
+          <p className="text-caption text-muted">{todayPlan === 'training' ? 'Planejado para hoje' : 'Próximo na sequência'}</p>
           <p className="text-lg font-semibold tracking-tight">{next.template.name}</p>
           <p className="mt-0.5 text-caption text-muted">{routineDetails(next)}</p>
           {next.items.length > 0 ? (
@@ -377,7 +394,7 @@ function GoalsCard({ goals }: { goals: GoalView[] }) {
   );
 }
 
-function WeekCard({ week, frequencyTarget }: { week: WeekSummary; frequencyTarget: number | null }) {
+function WeekCard({ week, frequencyTarget, planStats }: { week: WeekSummary; frequencyTarget: number | null; planStats: WeekPlanStats | null }) {
   return (
     <Card>
       <SectionHeader icon={<CalendarCheck className="size-4 text-accent" />} title="Esta semana" />
@@ -387,11 +404,15 @@ function WeekCard({ week, frequencyTarget }: { week: WeekSummary; frequencyTarge
           value={String(week.workoutsCompleted)}
           note={week.workoutsCompleted ? `${week.trainingDays} dia${week.trainingDays > 1 ? 's' : ''} de treino` : 'Nenhum ainda'}
         />
+        {planStats ? (
+          <WeekStat label="Planejados" value={String(planStats.plannedTotal)} note={`${planStats.plannedDaysDone} de ${planStats.plannedSoFar} feitos até hoje`} />
+        ) : (
         <WeekStat
           label="Meta da semana"
           value={frequencyTarget === null ? '—' : String(frequencyTarget)}
           note={frequencyTarget === null ? 'Defina em Objetivos → Frequência de treino' : `${Math.max(0, frequencyTarget - week.workoutsCompleted)} restante${frequencyTarget - week.workoutsCompleted === 1 ? '' : 's'}`}
         />
+        )}
       </div>
       <p className="mt-3 border-t border-line/60 pt-3 text-caption text-muted">
         {week.nutrition ? (

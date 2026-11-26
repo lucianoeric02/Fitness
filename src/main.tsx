@@ -10,11 +10,13 @@ import { ToastProvider } from './components/ui/Toast';
 import { requestPersistentStorage } from './data/db';
 import { ensureExerciseCatalog } from './data/repos/exercises';
 import { ensureNutritionData } from './data/repos/foods';
+import { ensureDefaultReminders } from './data/repos/planning';
 
 void requestPersistentStorage();
 // Starter exercise catalog: installed once, offline, removable in Dados e backup.
 void ensureExerciseCatalog().catch((e) => console.error('Catalog seed failed', e));
 void ensureNutritionData().catch((e) => console.error('Nutrition seed failed', e));
+void ensureDefaultReminders().catch((e) => console.error('Reminder seed failed', e));
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

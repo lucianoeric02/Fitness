@@ -2,6 +2,8 @@ import Dexie, { type EntityTable } from 'dexie';
 import type {
   MealDefinition,
   ProgressPhoto,
+  DayPlan,
+  Reminder,
   AppSettings,
   BodyCompositionEntry,
   BodyWeightEntry,
@@ -38,6 +40,8 @@ export class IronTrackDB extends Dexie {
   mealTemplates!: EntityTable<MealTemplate, 'id'>;
   meals!: EntityTable<MealDefinition, 'id'>;
   progressPhotos!: EntityTable<ProgressPhoto, 'id'>;
+  dayPlans!: EntityTable<DayPlan, 'id'>;
+  reminders!: EntityTable<Reminder, 'id'>;
   foodEntries!: EntityTable<FoodEntry, 'id'>;
   waterEntries!: EntityTable<WaterEntry, 'id'>;
   bodyWeights!: EntityTable<BodyWeightEntry, 'id'>;
@@ -138,6 +142,9 @@ export class IronTrackDB extends Dexie {
 
     // v5: local progress photos (never synced, not part of JSON backups).
     this.version(5).stores({ progressPhotos: 'id, day, category' });
+
+    // v6: weekly planning overrides and local reminders.
+    this.version(6).stores({ dayPlans: 'id, day', reminders: 'id, type' });
   }
 }
 
@@ -174,6 +181,8 @@ export const TABLE_NAMES = [
   'workoutSessions',
   'sessionExercises',
   'sets',
+  'dayPlans',
+  'reminders',
 ] as const satisfies ReadonlyArray<keyof IronTrackDB>;
 
 export type TableName = (typeof TABLE_NAMES)[number];

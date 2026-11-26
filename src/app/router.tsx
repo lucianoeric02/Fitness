@@ -4,6 +4,10 @@ import { ErrorState, LoadingScreen } from '@/components/ui/States';
 import { HomePage } from '@/features/home/HomePage';
 import { HydrationPage } from '@/features/hydration/HydrationPage';
 import { PlanningPage } from '@/features/planning/PlanningPage';
+import { RemindersPage } from '@/features/planning/RemindersPage';
+import { WeekReport } from '@/features/progress/WeekReport';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { DataPage } from '@/features/more/DataPage';
 import { MorePage } from '@/features/more/MorePage';
 import { CompositionPage } from '@/features/body/CompositionPage';
@@ -91,6 +95,18 @@ export const router = createHashRouter([
           { path: 'mais', element: <MorePage /> },
           { path: 'mais/hidratacao', element: <HydrationPage /> },
           { path: 'mais/planejamento', element: <PlanningPage /> },
+          {
+            path: 'mais/planejamento/revisao',
+            element: (
+              <>
+                <AppHeader title="Revisão semanal" back="/mais/planejamento" description="Resumo factual da semana com base nos seus registros." />
+                <PageContainer className="gap-4">
+                  <WeekReport />
+                </PageContainer>
+              </>
+            ),
+          },
+          { path: 'mais/lembretes', element: <RemindersPage /> },
           { path: 'mais/perfil', element: <ProfilePage /> },
           { path: 'mais/perfil/editar', element: <EditProfilePage /> },
           { path: 'mais/perfil/peso', element: <WeightHistoryPage /> },
