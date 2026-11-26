@@ -31,6 +31,7 @@ export function MeasurementFormPage() {
   const [day, setDay] = useState(today);
   const [values, setValues] = useState<Partial<Record<MeasurementSite, string>>>({});
   const [custom, setCustom] = useState<CustomRow[]>([]);
+  const [note, setNote] = useState('');
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -67,7 +68,7 @@ export function MeasurementFormPage() {
     ];
     setSaving(true);
     try {
-      const { saved, replaced } = await saveMeasurements(day, list);
+      const { saved, replaced } = await saveMeasurements(day, list, note);
       toast.success(`${saved} medida${saved > 1 ? 's' : ''} salva${saved > 1 ? 's' : ''}${replaced ? ` (${replaced} substituída${replaced > 1 ? 's' : ''})` : ''}.`);
       setValues({});
       setCustom([]);
@@ -86,6 +87,9 @@ export function MeasurementFormPage() {
       <PageContainer className="gap-4">
         <Card>
           <DateInput label="Data da medição" value={day} onChange={setDay} max={today} error={showErrors ? dayError : null} hint="Preencha só o que mediu. Mesma medida na mesma data substitui a anterior." />
+          <div className="mt-4">
+            <Input label="Observação (opcional)" value={note} onChange={setNote} maxLength={80} placeholder="Ex.: em jejum, pela manhã" />
+          </div>
         </Card>
         <Card className="flex flex-col gap-4">
           <SectionHeader title="Medidas (cm)" className="mb-0" />

@@ -59,7 +59,7 @@ export function CompositionPage() {
                   >
                     <span>
                       <span className="block text-body font-medium">{formatRelativeDay(c.day, today)}</span>
-                      {c.method && <span className="block text-caption text-muted">{METHOD_LABELS[c.method]}</span>}
+                      {c.method && <span className="block text-caption text-muted">{METHOD_LABELS[c.method]}{c.method === 'estimate' ? ' (valor estimado)' : ''}</span>}
                     </span>
                     <span className="tabular text-right text-caption text-muted">
                       {c.bodyFatPct !== undefined && (
@@ -91,6 +91,8 @@ function CompositionSheet({ open, entry, onClose }: { open: boolean; entry?: Bod
   const [day, setDay] = useState(today);
   const [fat, setFat] = useState('');
   const [muscle, setMuscle] = useState('');
+  const [water, setWater] = useState('');
+  const [visceral, setVisceral] = useState('');
   const [method, setMethod] = useState<Method | undefined>();
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -101,16 +103,22 @@ function CompositionSheet({ open, entry, onClose }: { open: boolean; entry?: Bod
     setDay(entry?.day ?? today);
     setFat(toInputValue(entry?.bodyFatPct));
     setMuscle(toInputValue(entry?.muscleMassKg));
+    setWater(toInputValue(entry?.bodyWaterPct));
+    setVisceral(toInputValue(entry?.visceralFat));
     setMethod(entry?.method);
     setShowErrors(false);
   }, [open, entry, today]);
 
   const fatN = parseDecimal(fat);
   const muscleN = parseDecimal(muscle);
+  const waterN = parseDecimal(water);
+  const visceralN = parseDecimal(visceral);
   const errors = {
     day: validateRecordDate(day, today),
     fat: validateNumber(fatN, { ...RULES.bodyFatPct, required: false }),
     muscle: validateNumber(muscleN, { ...RULES.muscleMassKg, required: false }),
+    water: validateNumber(waterN, { label: 'Água corporal', min: 20, max: 80, required: false }),
+    visceral: validateNumber(visceralN, { label: 'Gordura visceral', min: 1, max: 60, required: false }),
     empty: fatN === null && muscleN === null ? 'Informe gordura corporal, massa muscular ou ambos.' : null,
   };
   const valid = Object.values(errors).every((e) => !e);
@@ -122,7 +130,7 @@ function CompositionSheet({ open, entry, onClose }: { open: boolean; entry?: Bod
     }
     setSaving(true);
     try {
-      const { replaced } = await saveComposition({ day, bodyFatPct: fatN ?? undefined, muscleMassKg: muscleN ?? undefined, method }, entry?.id);
+      const { replaced } = await saveComposition({ day, bodyFatPct: fatN ?? undefined, muscleMassKg: muscleN ?? undefined, bodyWaterPct: waterN ?? undefined, visceralFat: visceralN ?? undefined, method }, entry?.id);
       toast.success(entry ? 'Avaliação atualizada.' : replaced ? `Avaliação de ${formatShortDay(day)} substituída.` : 'Avaliação registrada.');
       onClose();
     } catch (e) {
@@ -155,6 +163,10 @@ function CompositionSheet({ open, entry, onClose }: { open: boolean; entry?: Bod
           <div className="grid grid-cols-2 gap-3">
             <NumberInput label="Gordura corporal" suffix="%" value={fat} onChange={setFat} error={showErrors ? errors.fat : null} />
             <NumberInput label="Massa muscular" suffix="kg" value={muscle} onChange={setMuscle} error={showErrors ? errors.muscle : null} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <NumberInput label="Água corporal (opcional)" suffix="%" value={water} onChange={setWater} error={showErrors ? errors.water : null} />
+            <NumberInput label="Gordura visceral (opcional)" value={visceral} onChange={setVisceral} error={showErrors ? errors.visceral : null} hint="Nível da balança" />
           </div>
           {showErrors && errors.empty && (
             <p role="alert" className="text-caption text-danger">

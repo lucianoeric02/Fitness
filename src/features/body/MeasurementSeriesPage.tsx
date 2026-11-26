@@ -7,7 +7,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button, LinkButton } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ConfirmSheet } from '@/components/ui/ConfirmSheet';
-import { DateInput, NumberInput } from '@/components/ui/Field';
+import { DateInput, Input, NumberInput } from '@/components/ui/Field';
 import { EmptyState, LoadingScreen } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
 import { deleteMeasurement, DuplicateDayError, updateMeasurement } from '@/data/repos/body';
@@ -55,7 +55,10 @@ export function MeasurementSeriesPage() {
                       onClick={() => setEditing(m)}
                       className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors duration-fast active:bg-elevated"
                     >
-                      <span className="text-body font-medium">{formatRelativeDay(m.day, today)}</span>
+                      <span className="min-w-0">
+                        <span className="block text-body font-medium">{formatRelativeDay(m.day, today)}</span>
+                        {m.note && <span className="block truncate text-caption text-muted">{m.note}</span>}
+                      </span>
                       <span className="text-right">
                         <span className="tabular block text-body font-semibold">{formatNumber(m.valueCm, 1)} cm</span>
                         {prev && <span className="tabular block text-caption text-muted">{formatSigned(m.valueCm - prev.valueCm)} cm</span>}
@@ -78,6 +81,7 @@ function MeasurementEditSheet({ entry, onClose }: { entry: MeasurementEntry | nu
   const toast = useToast();
   const [day, setDay] = useState(today);
   const [value, setValue] = useState('');
+  const [note, setNote] = useState('');
   const [showErrors, setShowErrors] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -85,6 +89,7 @@ function MeasurementEditSheet({ entry, onClose }: { entry: MeasurementEntry | nu
     if (!entry) return;
     setDay(entry.day);
     setValue(toInputValue(entry.valueCm));
+    setNote(entry.note ?? '');
     setShowErrors(false);
   }, [entry]);
 
@@ -98,7 +103,7 @@ function MeasurementEditSheet({ entry, onClose }: { entry: MeasurementEntry | nu
       return;
     }
     try {
-      await updateMeasurement(entry.id, { day, valueCm: valueN });
+      await updateMeasurement(entry.id, { day, valueCm: valueN, note });
       toast.success('Medida atualizada.');
       onClose();
     } catch (e) {
@@ -125,6 +130,9 @@ function MeasurementEditSheet({ entry, onClose }: { entry: MeasurementEntry | nu
         <div className="grid grid-cols-2 gap-3 pt-2">
           <NumberInput label="Valor" suffix="cm" value={value} onChange={setValue} error={showErrors ? errors.value : null} />
           <DateInput label="Data" value={day} onChange={setDay} max={today} error={showErrors ? errors.day : null} />
+        </div>
+        <div className="mt-4">
+          <Input label="Observação" value={note} onChange={setNote} maxLength={80} />
         </div>
       </BottomSheet>
       <ConfirmSheet

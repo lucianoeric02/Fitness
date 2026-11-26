@@ -21,6 +21,7 @@ import { AddFoodPage } from '@/features/nutrition/AddFoodPage';
 import { FoodFormPage, FoodsPage, MealsSettingsPage, TemplateEditPage, TemplatesPage } from '@/features/nutrition/ManagePages';
 import { NutritionPage } from '@/features/nutrition/NutritionPage';
 import { OnboardingPage } from '@/features/onboarding/OnboardingPage';
+import { ComparePhotosPage, PhotosPage } from '@/features/progress/PhotosPages';
 import { ProgressPage } from '@/features/progress/ProgressPage';
 import { ActiveSessionPage } from '@/features/workout/ActiveSessionPage';
 import { ExerciseDetailPage, ExerciseFormPage, ExerciseLibraryPage } from '@/features/workout/ExercisePages';
@@ -85,6 +86,8 @@ export const router = createHashRouter([
           { path: 'nutricao/modelos/:id', element: <TemplateEditPage /> },
           { path: 'nutricao/refeicoes', element: <MealsSettingsPage /> },
           { path: 'progresso', element: <ProgressPage /> },
+          { path: 'progresso/fotos', element: <PhotosPage /> },
+          { path: 'progresso/fotos/comparar', element: <ComparePhotosPage /> },
           { path: 'mais', element: <MorePage /> },
           { path: 'mais/hidratacao', element: <HydrationPage /> },
           { path: 'mais/planejamento', element: <PlanningPage /> },

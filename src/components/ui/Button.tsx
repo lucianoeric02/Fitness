@@ -104,7 +104,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        'pressable inline-flex size-touch items-center justify-center rounded-full text-muted active:bg-elevated disabled:opacity-40',
+        'pressable inline-flex size-touch shrink-0 items-center justify-center rounded-full text-muted active:bg-elevated disabled:opacity-40',
         className,
       )}
       {...rest}

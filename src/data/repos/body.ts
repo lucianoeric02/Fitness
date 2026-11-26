@@ -78,7 +78,7 @@ export async function listBodyWeights(from?: DayKey, to?: DayKey): Promise<BodyW
 // ---- Body composition --------------------------------------------------------
 // One entry per day as well; at least one of body fat / muscle mass.
 
-export type CompositionInput = Pick<BodyCompositionEntry, 'day' | 'bodyFatPct' | 'muscleMassKg' | 'method' | 'note'>;
+export type CompositionInput = Pick<BodyCompositionEntry, 'day' | 'bodyFatPct' | 'muscleMassKg' | 'bodyWaterPct' | 'visceralFat' | 'method' | 'note'>;
 
 export async function saveComposition(input: CompositionInput, id?: string): Promise<{ replaced: boolean }> {
   if (input.bodyFatPct === undefined && input.muscleMassKg === undefined) throw new Error('Informe gordura corporal ou massa muscular.');
@@ -93,6 +93,8 @@ export async function saveComposition(input: CompositionInput, id?: string): Pro
       measuredAt: target && target.day === input.day ? target.measuredAt : now,
       bodyFatPct: input.bodyFatPct === undefined ? undefined : round(input.bodyFatPct, 1),
       muscleMassKg: input.muscleMassKg === undefined ? undefined : round(input.muscleMassKg, 1),
+      bodyWaterPct: input.bodyWaterPct === undefined ? undefined : round(input.bodyWaterPct, 1),
+      visceralFat: input.visceralFat === undefined ? undefined : round(input.visceralFat, 1),
       method: input.method,
       note: input.note?.trim() || undefined,
       createdAt: target?.createdAt ?? now,
@@ -115,7 +117,7 @@ export interface MeasurementValue {
   valueCm: number;
 }
 
-export async function saveMeasurements(day: DayKey, values: MeasurementValue[]): Promise<{ saved: number; replaced: number }> {
+export async function saveMeasurements(day: DayKey, values: MeasurementValue[], note?: string): Promise<{ saved: number; replaced: number }> {
   return db.transaction('rw', db.measurements, async () => {
     const now = nowIso();
     const sameDay = await db.measurements.where('day').equals(day).toArray();
@@ -131,6 +133,7 @@ export async function saveMeasurements(day: DayKey, values: MeasurementValue[]):
         site: v.site,
         customName: v.site === 'custom' ? v.customName?.trim() : undefined,
         valueCm: round(v.valueCm, 1),
+        note: note?.trim() || existing?.note,
         createdAt: existing?.createdAt ?? now,
         updatedAt: now,
       });
@@ -139,7 +142,7 @@ export async function saveMeasurements(day: DayKey, values: MeasurementValue[]):
   });
 }
 
-export async function updateMeasurement(id: string, patch: { day: DayKey; valueCm: number }): Promise<void> {
+export async function updateMeasurement(id: string, patch: { day: DayKey; valueCm: number; note?: string }): Promise<void> {
   await db.transaction('rw', db.measurements, async () => {
     const current = await db.measurements.get(id);
     if (!current) throw new Error('Medida não encontrada.');
@@ -148,7 +151,13 @@ export async function updateMeasurement(id: string, patch: { day: DayKey; valueC
       (m) => m.id !== id && measurementKey(m.site, m.customName) === key,
     );
     if (clash) throw new DuplicateDayError(patch.day);
-    await db.measurements.put({ ...current, day: patch.day, valueCm: round(patch.valueCm, 1), updatedAt: nowIso() });
+    await db.measurements.put({
+      ...current,
+      day: patch.day,
+      valueCm: round(patch.valueCm, 1),
+      ...(patch.note !== undefined ? { note: patch.note.trim() || undefined } : {}),
+      updatedAt: nowIso(),
+    });
   });
 }
 

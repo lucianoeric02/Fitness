@@ -1,6 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type {
   MealDefinition,
+  ProgressPhoto,
   AppSettings,
   BodyCompositionEntry,
   BodyWeightEntry,
@@ -36,6 +37,7 @@ export class IronTrackDB extends Dexie {
   foods!: EntityTable<Food, 'id'>;
   mealTemplates!: EntityTable<MealTemplate, 'id'>;
   meals!: EntityTable<MealDefinition, 'id'>;
+  progressPhotos!: EntityTable<ProgressPhoto, 'id'>;
   foodEntries!: EntityTable<FoodEntry, 'id'>;
   waterEntries!: EntityTable<WaterEntry, 'id'>;
   bodyWeights!: EntityTable<BodyWeightEntry, 'id'>;
@@ -133,6 +135,9 @@ export class IronTrackDB extends Dexie {
             t.items = (t.items ?? []).map((i: { foodName?: string }) => ({ ...i, foodName: i.foodName ?? 'Alimento' }));
           });
       });
+
+    // v5: local progress photos (never synced, not part of JSON backups).
+    this.version(5).stores({ progressPhotos: 'id, day, category' });
   }
 }
 
@@ -172,6 +177,9 @@ export const TABLE_NAMES = [
 ] as const satisfies ReadonlyArray<keyof IronTrackDB>;
 
 export type TableName = (typeof TABLE_NAMES)[number];
+
+/** Tables holding private media: wiped with everything else, but never exported. */
+export const PRIVATE_TABLES = ['progressPhotos'] as const satisfies ReadonlyArray<keyof IronTrackDB>;
 
 /** Ask the browser not to evict our data under storage pressure (web/PWA). */
 export async function requestPersistentStorage(): Promise<boolean> {

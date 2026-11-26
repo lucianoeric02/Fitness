@@ -1,17 +1,34 @@
-import { TrendingUp } from 'lucide-react';
-import { ModuleShell } from '@/features/ModuleShell';
+import { useSearchParams } from 'react-router';
+import { RangePicker } from '@/components/charts/BarChart';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { BodyTab } from './BodyTab';
+import { NutritionTab } from './NutritionTab';
+import { TrainingTab } from './TrainingTab';
+import { WeekReport } from './WeekReport';
+
+const TABS = [
+  { value: 'corpo', label: 'Corpo' },
+  { value: 'treino', label: 'Treino' },
+  { value: 'nutricao', label: 'Nutrição' },
+  { value: 'semana', label: 'Semana' },
+] as const;
+type Tab = (typeof TABS)[number]['value'];
 
 export function ProgressPage() {
+  const [params, setParams] = useSearchParams();
+  const raw = params.get('aba');
+  const tab: Tab = TABS.some((t) => t.value === raw) ? (raw as Tab) : 'corpo';
   return (
-    <ModuleShell
-      title="Progresso"
-      description="Peso corporal, medidas e a evolução das suas metas ao longo do tempo."
-      empty={{
-        icon: <TrendingUp className="size-6" />,
-        title: 'Sem histórico para analisar',
-        description: 'Seu peso inicial e sua meta principal já estão salvos. Gráficos e novas pesagens chegam na próxima atualização.',
-      }}
-      upcoming={['Pesagens e tendência de 7 dias', 'Medidas corporais e composição', 'Metas secundárias', 'Gráficos de volume e força']}
-    />
+    <>
+      <AppHeader title="Progresso" description="Evolução física, treino e nutrição com base nos seus registros." />
+      <PageContainer className="gap-4">
+        <RangePicker label="Seção" value={tab} onChange={(v) => setParams(v === 'corpo' ? {} : { aba: v }, { replace: true })} options={TABS} />
+        {tab === 'corpo' && <BodyTab />}
+        {tab === 'treino' && <TrainingTab />}
+        {tab === 'nutricao' && <NutritionTab />}
+        {tab === 'semana' && <WeekReport />}
+      </PageContainer>
+    </>
   );
 }

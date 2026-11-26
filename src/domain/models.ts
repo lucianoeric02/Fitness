@@ -209,6 +209,7 @@ export interface MeasurementEntry extends BaseRecord {
   /** Required when site is 'custom' (e.g. "Ombro relaxado"). */
   customName?: string;
   valueCm: number;
+  note?: string;
 }
 
 export interface BodyCompositionEntry extends BaseRecord {
@@ -216,8 +217,28 @@ export interface BodyCompositionEntry extends BaseRecord {
   measuredAt: string;
   bodyFatPct?: number;
   muscleMassKg?: number;
+  /** Optional extras from bioimpedance scales. */
+  bodyWaterPct?: number;
+  visceralFat?: number;
   method?: 'bioimpedance' | 'skinfold' | 'dexa' | 'estimate';
   note?: string;
+}
+
+export type PhotoCategory = 'front' | 'side' | 'back' | 'custom';
+
+/**
+ * Progress photo, stored only on this device (never uploaded, excluded from
+ * JSON backups). Image bytes are kept as an ArrayBuffer (resized JPEG).
+ */
+export interface ProgressPhoto extends BaseRecord {
+  day: DayKey;
+  category: PhotoCategory;
+  customCategory?: string;
+  note?: string;
+  mime: string;
+  data: ArrayBuffer;
+  width: number;
+  height: number;
 }
 
 // ---- Goals -----------------------------------------------------------------

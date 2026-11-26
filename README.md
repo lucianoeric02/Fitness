@@ -81,6 +81,19 @@ Proteções de navegação: a barra inferior se esconde enquanto o teclado está
 - Totais sempre calculados dos registros; histórico de 14 dias com média e dias em que a meta foi batida.
 - Meta de água alterável na própria tela (versionada a partir de hoje, como as demais metas diárias).
 
+## Progresso
+
+Aba **Progresso** com quatro seções:
+
+- **Corpo**: objetivo principal em destaque + secundários; peso (atual, inicial, meta, variação desde o início e no período, tendência kg/sem) com gráfico por período (7d, 30d, 90d, 6m, 1a, tudo); composição corporal e medidas com gráficos quando há ≥ 2 registros; fotos de progresso.
+- **Treino**: frequência, semanas ativas (desde o primeiro treino), volume semanal, séries por grupo muscular, 1RM estimado por exercício e recordes.
+- **Nutrição**: médias só sobre dias registrados (mínimo 3), dias perto da meta (±10%), calorias por dia e tendência semanal.
+- **Semana**: relatório factual (peso, treinos, volume, nutrição, hidratação, objetivos, recordes).
+
+Gráficos SVG próprios (sem bibliotecas externas). Pesagens são pontos; nada é interpolado; médias móveis e estimativas (ex.: massa magra) são rotuladas como calculadas.
+
+**Fotos de progresso** ficam apenas no IndexedDB do aparelho (redimensionadas localmente), nunca são enviadas a serviços externos e **não entram no backup JSON**.
+
 ## Princípios de dados
 
 - **IDs UUID** e `createdAt`/`updatedAt` em todo registro, prontos para sincronização futura.

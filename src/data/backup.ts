@@ -1,4 +1,4 @@
-import { db, migrateGoalV1, TABLE_NAMES, type TableName } from '@/data/db';
+import { db, migrateGoalV1, PRIVATE_TABLES, TABLE_NAMES, type TableName } from '@/data/db';
 import { nowIso } from '@/lib/dates';
 
 export const BACKUP_FORMAT = 'iron-track-backup';
@@ -95,10 +95,11 @@ export async function restoreBackup(backup: BackupFile): Promise<BackupStats> {
   return backupStats(backup);
 }
 
-/** Deletes all local data. */
+/** Deletes all local data, including private photos. */
 export async function wipeAllData(): Promise<void> {
-  await db.transaction('rw', TABLE_NAMES.map((t) => db.table(t)), async () => {
-    for (const name of TABLE_NAMES) await db.table(name).clear();
+  const all = [...TABLE_NAMES, ...PRIVATE_TABLES];
+  await db.transaction('rw', all.map((t) => db.table(t)), async () => {
+    for (const name of all) await db.table(name).clear();
   });
 }
 
