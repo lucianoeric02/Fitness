@@ -74,6 +74,13 @@ Proteções de navegação: a barra inferior se esconde enquanto o teclado está
 - **Refeições personalizáveis** (renomear, reordenar, ocultar, criar), com metas opcionais por refeição.
 - **Modelos de refeição**: salvar refeição como modelo, editar, duplicar e aplicar em qualquer dia; "repetir do dia anterior".
 
+## Hidratação
+
+- Botões +200/+300/+500 ml e quantidade personalizada (com observação), sem confirmações; "Desfazer" no aviso e "Desfazer último" na tela.
+- Cada registro guarda ml, dia local, horário real e observação; editar quantidade/horário/observação e excluir (com desfazer).
+- Totais sempre calculados dos registros; histórico de 14 dias com média e dias em que a meta foi batida.
+- Meta de água alterável na própria tela (versionada a partir de hoje, como as demais metas diárias).
+
 ## Princípios de dados
 
 - **IDs UUID** e `createdAt`/`updatedAt` em todo registro, prontos para sincronização futura.

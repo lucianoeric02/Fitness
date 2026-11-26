@@ -170,7 +170,9 @@ export interface FoodEntry extends BaseRecord {
 export interface WaterEntry extends BaseRecord {
   day: DayKey;
   amountMl: number;
+  /** Actual time of the drink (ISO). */
   loggedAt: string;
+  note?: string;
 }
 
 // ---- Body ------------------------------------------------------------------

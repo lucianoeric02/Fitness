@@ -109,7 +109,7 @@ describe('dashboard', () => {
     expect(links('Abrir perfil')).toEqual(['#/mais/perfil']);
     expect(links(/Adicionar alimento/)).toEqual(['#/nutricao/adicionar']);
     expect(links(/Iniciar treino/)).toEqual(['#/treino']);
-    expect(links(/Histórico/)).toEqual(['#/mais/perfil/peso']);
+    expect(links(/Histórico/).sort()).toEqual(['#/mais/hidratacao', '#/mais/perfil/peso']);
     expect(links(/Ver todos/)).toEqual(['#/mais/objetivos']);
 
     fireEvent.click(screen.getByRole('button', { name: /Adicionar água/ }));

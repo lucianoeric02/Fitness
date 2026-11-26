@@ -276,6 +276,9 @@ function HydrationCard({ water, last }: { water: MetricProgress; last: { id: str
           </Button>
         ))}
       </div>
+      <Link to="/mais/hidratacao" className="-mb-2 mt-1 flex min-h-touch items-center justify-center gap-0.5 text-caption font-medium text-muted">
+        Histórico e ajustes <ChevronRight className="size-4" />
+      </Link>
     </Card>
   );
 }
